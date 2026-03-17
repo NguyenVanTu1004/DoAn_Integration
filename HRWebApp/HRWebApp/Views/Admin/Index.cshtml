@@ -1,0 +1,427 @@
+﻿@using HRWebApp.Models
+@model IEnumerable<EmployeeViewModel>
+
+@{
+    ViewBag.Title = "Admin Dashboard";
+}
+
+<div class="content">
+    <div class="btn-controls">
+        <div class="btn-box-row row-fluid">
+            <div class="btn-box big span4">
+                <i class="icon-random"></i>
+                <b>Data Tool</b>
+                <p class="text-muted">Quản trị dữ liệu</p>
+                <div class="alert alert-info" style="font-size: 12px; margin-top:10px;">
+                    <a href="@Url.Action("SeedData", "Admin")" class="btn btn-primary btn-small">Nạp 500k Data</a>
+                </div>
+                @if (TempData["Message"] != null)
+                {
+                    <div class="alert alert-success" style="margin-top: 5px; font-size: 11px;">@TempData["Message"]</div>
+                }
+            </div>
+
+            <a href="#" class="btn-box big span4">
+                <i class="icon-user"></i><b>@String.Format("{0:N0}", ViewBag.TotalUsers ?? 0)</b>
+                <p class="text-muted">Total Employees</p>
+            </a>
+
+            <a href="#" class="btn-box big span4">
+                <i class="icon-money"></i><b>@ViewBag.TotalSalary</b>
+                <p class="text-muted">Total Payroll</p>
+            </a>
+        </div>
+
+        <div class="btn-box-row row-fluid">
+            <div class="span8">
+                <div class="module">
+                    <div class="module-head">
+                        <h3>Quản lý theo yêu cầu CEO (Manage by Exception)</h3>
+                    </div>
+                    <div class="module-body">
+                       
+                        <p><strong>Cảnh báo nhân sự:</strong></p>
+                        <div class="row-fluid btn-container">
+                            <a href="@Url.Action("AlertAnniversary", "Admin")" class="btn-box big span4 first-btn">
+                                <i class="icon-time"></i>
+                                <b>Kỷ niệm</b>
+                                <p class="text-muted">Ngày vào làm</p>
+                            </a>
+
+                            <a href="@Url.Action("AlertVacation", "Admin")" class="btn-box big span4">
+                                <i class="icon-plane"></i>
+                                <b>Nghỉ phép</b>
+                                <p class="text-muted">> 25 ngày</p>
+                            </a>
+
+                            <a href="@Url.Action("AlertBirthday", "Admin")" class="btn-box big span4">
+                                <i class="icon-gift"></i>
+                                <b>Sinh nhật</b>
+                                <p class="text-muted">Tháng @DateTime.Now.Month</p>
+                            </a>
+                        </div>
+
+                        <style>
+                            /* Ép khung Container luôn đủ 100% chiều rộng */
+                            .btn-container {
+                                display: flex !important;
+                                justify-content: space-between;
+                                width: 100%;
+                                margin: 0 auto;
+                            }
+
+                            /* Định dạng lại btn-box để đồng bộ với Header */
+                            .btn-box.big {
+                                background: #fff;
+                                border: 1px solid #e3e3e3;
+                                border-radius: 4px;
+                                text-align: center;
+                                padding: 30px 10px;
+                                margin-bottom: 20px;
+                                flex: 1; /* Giúp các nút tự giãn nở đều nhau */
+                                margin-left: 15px; /* Khoảng cách giữa các nút */
+                                text-decoration: none;
+                                transition: all 0.3s ease;
+                            }
+
+                            /* Nút đầu tiên không có margin bên trái để cân bằng */
+                            .first-btn {
+                                margin-left: 0 !important;
+                            }
+
+                            .btn-box.big i {
+                                font-size: 35px;
+                                color: #24b5e1;
+                                display: block;
+                                margin-bottom: 12px;
+                            }
+
+                            .btn-box.big b {
+                                font-size: 18px;
+                                color: #333;
+                                display: block;
+                            }
+
+                            /* Hiệu ứng di chuột cho chuyên nghiệp */
+                            .btn-box.big:hover {
+                                border-color: #24b5e1;
+                                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+                                transform: translateY(-2px);
+                            }
+                        </style>
+
+                        <p style="margin-top: 20px;"><strong>Báo cáo tổng hợp:</strong></p>
+                        <div class="row-fluid">
+                            <div class="btn-box-row row-fluid">
+                                <a href="@Url.Action("ReportEarnings", "Admin")" class="btn-box big span6">
+                                    <i class="icon-money" style="color: #f8d347;"></i>
+                                    <b>@ViewBag.TotalSalary</b>
+                                    <p class="text-muted">Thống kê Thu nhập</p>
+                                </a>
+
+                                <a href="@Url.Action("ReportBenefits", "Admin")" class="btn-box big span6">
+                                    <i class="icon-briefcase" style="color: #24b5e1;"></i>
+                                    <b>Phúc lợi</b>
+                                    <p class="text-muted">Thống kê Phúc lợi</p>
+                                </a>
+                            </div>
+                        </div>
+
+                        <style>
+                            /* CSS bổ trợ để đảm bảo khung hình cân bằng tuyệt đối */
+                            .btn-box-row {
+                                display: flex !important;
+                                gap: 2%; /* Tạo khoảng hở nhỏ giữa 2 nút */
+                            }
+
+                            .btn-box.big.span6 {
+                                margin-left: 0 !important; /* Xóa margin mặc định của Bootstrap */
+                                flex: 1; /* Ép 2 nút chiếm diện tích bằng nhau */
+                                background: #fff;
+                                border: 1px solid #e3e3e3;
+                                border-radius: 4px;
+                                text-align: center;
+                                padding: 25px 10px;
+                                text-decoration: none;
+                                transition: all 0.3s ease;
+                            }
+
+                                .btn-box.big.span6:hover {
+                                    border-color: #24b5e1;
+                                    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+                                }
+                        </style>
+                    </div>
+                </div>
+            </div>
+
+            @* Widget trình duyệt (Dữ liệu tĩnh) *@
+            <ul class="widget widget-usage unstyled span4">
+                <li>
+                    <p><strong>Windows 8</strong> <span class="pull-right small muted">78%</span></p>
+                    <div class="progress tight"><div class="bar" style="width: 78%;"></div></div>
+                </li>
+                <li>
+                    <p><strong>Mac</strong> <span class="pull-right small muted">56%</span></p>
+                    <div class="progress tight"><div class="bar bar-success" style="width: 56%;"></div></div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="module">
+        <div class="module-head">
+            <h3>
+                @if (ViewBag.ReportType == "Vacation")
+                {
+                    @:Biểu đồ thống kê số lượng nhân viên nghỉ phép theo ngày
+                }
+                else if (ViewBag.ReportType == "Birthday")
+                {
+                    @:Biểu đồ phân bổ sinh nhật nhân viên trong tháng
+                }
+                else if (ViewBag.ReportType == "Anniversary")
+                {
+                    @:Biểu đồ thâm niên công tác của nhân viên
+                }
+                else
+                {
+                    @:Phân bổ quỹ lương theo Dân tộc (Real-time Chart)
+                }
+            </h3>
+        </div>
+        <div class="module-body">
+            <div class="chart inline-legend grid">
+                <div id="placeholder2" class="graph" style="height: 400px"></div>
+            </div>
+        </div>
+    </div>
+    @*hien thi thong bao theo muc bao cao ma nguoi dung yeu cau
+    *@
+    @if (ViewBag.StatusMessage != null)
+    {
+        <div class="alert alert-info">
+            <button type="button" class="close" data-dismiss="alert">×</button>
+            <strong>Thông báo:</strong> @ViewBag.StatusMessage
+        </div>
+    }
+    <div class="module">
+        <div class="module-head"><h3>Danh sách nhân viên</h3></div>
+        <div class="module-body table">
+            <table cellpadding="0" cellspacing="0" border="0" class="datatable-1 table table-bordered table-striped display" width="100%">
+                <thead>
+                    <tr>
+                        <th>Mã NV</th>
+                        <th>Họ và Tên</th>
+                        <th>Giới tính</th>
+                        <th>Cổ đông</th>
+
+                        @* Cột 5: Tự đổi tên giữa Dân tộc và Ngày nghỉ *@
+                        <th>
+                            @if (ViewBag.ReportType == "Vacation")
+                            {
+                                @:Ngày nghỉ
+                            }
+                            else
+                            {
+                                @:Dân tộc
+                            }
+                        </th>
+
+                        <th>Lương ($)</th>
+
+                        @* Cột 7: Tự đổi tên giữa Ngày sinh và Ngày vào làm *@
+                        <th>
+                            @if (ViewBag.ReportType == "Birthday")
+                            {
+                                @:Ngày sinh
+                            }
+                            else
+                            {
+                                @:Ngày vào làm
+                            }
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null)
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr class="odd gradeX">
+                                <td>@item.ID</td>
+                                <td>@item.FullName</td>
+                                <td>@item.Gender</td>
+                                <td>@item.Shareholder</td>
+                                <td>
+                                    @if (ViewBag.ReportType == "Vacation")
+                                    {
+                                        <span class="label label-important">@item.Ethnicity ngày</span>
+                                    }
+                                    else
+                                    {
+                                        @item.Ethnicity
+                                    }
+                                </td>
+                                <td class="center">@String.Format("{0:N0}", item.Salary)</td>
+                                <td class="center">@item.HireDate</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+@* 1. NẠP THƯ VIỆN CẦN THIẾT (Sửa lỗi $ is not defined) *@
+<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.pie.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.categories.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.resize.min.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        // 2. LẤY DỮ LIỆU TỪ CONTROLLER
+        var rawData = @Html.Raw(ViewBag.ChartData ?? "[]");
+        var reportType = '@ViewBag.ReportType';
+
+        if ($("#placeholder2").length > 0 && rawData.length > 0) {
+            var plotData = [];
+            var chartOptions = {};
+
+            // A. CẤU HÌNH BIỂU ĐỒ TRÒN (Cho báo cáo Dân tộc/Mặc định)
+            if (reportType !== "Birthday" && reportType !== "Vacation" && reportType !== "Anniversary") {
+                plotData = rawData;
+                chartOptions = {
+                    series: {
+                        pie: {
+                            show: true,
+                            radius: 1,
+                            innerRadius: 0.4, // Tạo hình bánh Donut cho hiện đại
+                            label: {
+                                show: true,
+                                radius: 2/3,
+                                formatter: function(label, series) {
+                                    return '<div style="font-size:11px; text-align:center; padding:2px; color:white;">' + label + '<br/>' + Math.round(series.percent) + '%</div>';
+                                },
+                                background: { opacity: 0.5, color: '#000' }
+                            }
+                        }
+                    },
+                    legend: { show: true, location: "ne" }
+                };
+            }
+            // B. CẤU HÌNH BIỂU ĐỒ CỘT CHI TIẾT (Cho Sinh nhật, Nghỉ phép, Kỷ niệm)
+            else {
+                var barData = [];
+                var ticks = [];
+                var barColor = "#458fba"; // Mặc định xanh dương
+
+                // Đổi màu theo loại cảnh báo của CEO
+                if (reportType === "Vacation") barColor = "#d9534f"; // Đỏ cảnh báo
+                if (reportType === "Birthday") barColor = "#5cb85c";  // Xanh lá tươi mới
+
+                $.each(rawData, function (i, item) {
+                    barData.push([i, item.data]);
+                    ticks.push([i, item.label]);
+                });
+
+                plotData = [{
+                    label: "@ViewBag.ChartTitle",
+                    data: barData,
+                    color: barColor
+                }];
+
+                chartOptions = {
+                    series: {
+                        bars: {
+                            show: true,
+                            barWidth: 0.6,
+                            align: "center",
+                            fill: 0.8,
+                            lineWidth: 1,
+                            order: 1
+                        }
+                    },
+                    xaxis: {
+                        ticks: ticks,
+                        tickLength: 0,
+                        axisLabel: "Danh mục",
+                        axisLabelUseCanvas: true,
+                        axisLabelFontSizePixels: 12,
+                        axisLabelPadding: 10
+                    },
+                    yaxis: {
+                        tickColor: "#f3f3f3",
+                        min: 0,
+                        axisLabel: "Số lượng nhân viên"
+                    },
+                    grid: {
+                        hoverable: true,
+                        clickable: true,
+                        borderWidth: 1,
+                        borderColor: '#f0f0f0',
+                        backgroundColor: { colors: ["#ffffff", "#f9f9f9"] }
+                    },
+                    legend: { show: false }
+                };
+            }
+
+            // 3. THỰC THI VẼ BIỂU ĐỒ
+            $.plot($("#placeholder2"), plotData, chartOptions);
+            // khai bao bang hien thi tat ca thong tin cua nhan vien 
+
+            $('#myTable').DataTable({
+    "processing": true,
+    "serverSide": true, // BẮT BUỘC để gọi vào đoạn code Skip/Take ở trên
+    "ajax": {
+        "url": "/Personals/Index",
+        "data": { "reportType": "@ViewBag.ReportType" }
+    },
+    "columns": [
+        { "data": "ID" },
+        { "data": "FullName" },
+        { "data": "Gender" },
+        { "data": "Shareholder" },
+        { "data": "EthnicityOrVacation" },
+        { "data": "Salary" },
+        { "data": "HireOrBirthDate" }
+    ],
+    "lengthMenu": [10, 20, 50, 100] // Đây chính là các lựa chọn giới hạn hiển thị
+            });
+
+
+            // 4. HIỆU ỨNG TOOLTIP CHI TIẾT KHI RÊ CHUỘT
+            $("<div id='flot-tooltip'></div>").css({
+                position: "absolute",
+                display: "none",
+                border: "1px solid #333",
+                padding: "4px 8px",
+                "background-color": "#ffffff",
+                opacity: 0.9,
+                "border-radius": "3px",
+                "font-size": "12px",
+                "font-weight": "bold",
+                "box-shadow": "0px 2px 5px rgba(0,0,0,0.2)"
+            }).appendTo("body");
+
+            $("#placeholder2").bind("plothover", function (event, pos, item) {
+                if (item) {
+                    var y = item.datapoint[1];
+                    var label = (reportType !== "Birthday" && reportType !== "Vacation" && reportType !== "Anniversary")
+                                ? item.series.label
+                                : ticks[item.dataIndex][1];
+
+                    $("#flot-tooltip").html(label + ": " + y + " nhân viên")
+                        .css({ top: item.pageY + 5, left: item.pageX + 5 })
+                        .fadeIn(200);
+                } else {
+                    $("#flot-tooltip").hide();
+                }
+            });
+        }
+    });
+</script>

@@ -1,0 +1,37 @@
+﻿@model IEnumerable<HRWebApp.Models.Personal>
+
+<div class="module">
+    <div class="module-head">
+        <h3>Personal List (Top 100)</h3>
+    </div>
+    <div class="module-body table">
+        <table class="table table-bordered table-striped display" width="100%">
+            <thead>
+                <tr>
+                    <th>Full Name</th>
+                    <th>City</th>
+                    <th>Email</th>
+                    <th>Gender</th>
+                    <th>Shareholder</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.First_Name @item.Last_Name</td>
+                        <td>@item.City</td>
+                        <td>@item.Email</td>
+                        <td>@(item.Gender == 1 ? "Male" : "Female")</td>
+                        <td>@(item.Shareholder_Status == 1 ? "Yes" : "No")</td>
+                        <td>
+                            @Html.ActionLink("Edit", "Edit", new { id = item.Employee_ID }) |
+                            @Html.ActionLink("Delete", "Delete", new { id = item.Employee_ID })
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
