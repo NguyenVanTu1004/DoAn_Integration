@@ -36,7 +36,19 @@
                                 </tr>
                             </core:forEach>
                         </tbody>
+
                     </table>
+                    <div style="margin-top:20px; text-align:center">
+
+                        <core:if test="${currentPage > 1}">
+                            <a href="?page=${currentPage-1}">Previous</a>
+                        </core:if>
+
+                        Page ${currentPage}
+
+                        <a href="?page=${currentPage+1}">Next</a>
+
+                    </div>
                 </div>
             </div><!--/.module-->
         </div>

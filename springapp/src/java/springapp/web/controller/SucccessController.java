@@ -6,11 +6,14 @@
 package springapp.web.controller;
 
 import javax.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 import springapp.web.model.Users;
+import springapp.web.dao.UserDao;
+import springapp.web.dao.EmployeeDao;
 
 /**
  *
@@ -19,12 +22,20 @@ import springapp.web.model.Users;
 @Controller
 @RequestMapping(value = "/admin")
 public class SucccessController {
+    @Autowired
+    private UserDao userDao;
+    @Autowired
+    private EmployeeDao empDao;
 
     @RequestMapping(value = {"/dashboard"}, method = RequestMethod.GET)
     public ModelAndView viewsDashboard(HttpServletRequest request) {
         Users user = (Users) request.getSession().getAttribute("LOGGEDIN_USER");
         if (user != null) {
+            long totalPayroll = empDao.sumPay_Rates();
+            long totalUsers = userDao.countUsers();
             ModelAndView model = new ModelAndView("admin/dashboard");
+            model.addObject("totalUsers", totalUsers);
+            model.addObject("totalPayroll", totalPayroll);
             return model;
         } else {
             ModelAndView model = new ModelAndView("login");

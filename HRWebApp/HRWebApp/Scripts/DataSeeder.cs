@@ -170,7 +170,7 @@ namespace HRWebApp.Scripts
             {
                 bulkCopy.DestinationTableName = tableName;
                 bulkCopy.BatchSize = 5000;
-                bulkCopy.BulkCopyTimeout = 120; // Tăng timeout cho dữ liệu lớn
+                bulkCopy.BulkCopyTimeout = 120; 
 
                 foreach (DataColumn column in data.Columns)
                 {

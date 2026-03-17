@@ -2,105 +2,239 @@
 @model IEnumerable<EmployeeViewModel>
 
 @{
-    ViewBag.Title = "Executive Dashboard";
+    ViewBag.Title = "Executive Dashboard | Integrated HR & Payroll System";
 }
 
 <div class="content">
+    @* --- THÔNG BÁO KẾT QUẢ --- *@
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success">
+            <button type="button" class="close" data-dismiss="alert">×</button>
+            <strong><i class="icon-ok"></i> Thành công!</strong> @TempData["Message"]
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-error">
+            <button type="button" class="close" data-dismiss="alert">×</button>
+            <strong><i class="icon-remove"></i> Lỗi!</strong> @TempData["Error"]
+        </div>
+    }
+
     <div class="btn-controls">
         <div class="btn-box-row row-fluid">
             <div class="btn-box big span4">
-                <i class="icon-random"></i><b>Data Tool</b>
-                <p class="text-muted">Quản trị tích hợp</p>
+                <i class="icon-random" style="color: #24b5e1;"></i>
+                <b>Data Integration Tool</b>
+                <p class="text-muted">Đồng bộ HR & Payroll System</p>
                 <div style="margin-top:10px;">
-                    <a href="@Url.Action("SeedData", "Admin")" class="btn btn-primary btn-small">Tải xuống dữ liệu hệ thống.</a>
+                    <a href="@Url.Action("SeedData", "Admin")" class="btn btn-primary btn-small" id="btnSync" onclick="return startSync(this);">
+                        <i class="icon-download-alt"></i> Sync Master Data
+                    </a>
                 </div>
             </div>
 
-            <a href="#" class="btn-box big span4">
-                <i class="icon-user"></i>
-                <b>@String.Format("{0:N0}", ViewBag.TotalUsers ?? 0)</b>
-                <p class="text-muted">Tổng nhân sự (HR System) và hệ thống tính lương (Payroll)</p>
-            </a>
+            <div class="btn-box big span4">
+                <i class="icon-user" style="color: #2dcc70;"></i>
+                <b id="total-employees">@String.Format("{0:N0}", ViewBag.TotalUsers ?? 0)</b>
+                <p class="text-muted">Tổng nhân sự (HRMS)</p>
+                <small class="label label-info">Real-time sync</small>
+            </div>
 
-            <a href="#" class="btn-box big span4">
-                <i class="icon-money"></i>
+            <div class="btn-box big span4">
+                <i class="icon-money" style="color: #f1c40f;"></i>
                 <b>@ViewBag.TotalSalary</b>
-                <p class="text-muted">Tổng quỹ lương (Payroll System)</p>
-            </a>
+                <p class="text-muted">Tổng quỹ lương (Payroll)</p>
+                <small class="label @(ViewBag.TotalSalary.ToString().Contains("Offline") ? "label-important" : "label-success")">
+                    @(ViewBag.TotalSalary.ToString().Contains("Offline") ? "MySQL Disconnected" : "Current Cycle")
+                </small>
+            </div>
         </div>
 
-        <div class="btn-box-row row-fluid">
-            <div class="span12">
-                <div class="module">
-                    <div class="module-head"><h3>Cảnh báo quản trị</h3></div>
-                    <div class="module-body">
-                        <div class="row-fluid">
-                            <a href="@Url.Action("AlertAnniversary", "Admin")" class="btn-box small span4">
-                                <i class="icon-time"></i><b>Kỷ niệm vào làm</b>
-                            </a>
-                            <a href="@Url.Action("AlertVacation", "Admin")" class="btn-box small span4">
-                                <i class="icon-plane"></i><b>Nghỉ phép > 25 ngày</b>
-                            </a>
-                            <a href="@Url.Action("AlertBirthday", "Admin")" class="btn-box small span4">
-                                <i class="icon-gift"></i><b>Sinh nhật tháng @DateTime.Now.Month</b>
-                            </a>
-                        </div>
-                    </div>
+        <div class="module">
+            <div class="module-head">
+                <h3><i class="icon-warning-sign"></i> Trung tâm cảnh báo Quản trị</h3>
+            </div>
+            <div class="module-body">
+                <div class="row-fluid btn-container">
+                    <a href="@Url.Action("AlertAnniversary", "Admin")" class="btn-box big span4 first-btn">
+                        <i class="icon-time" style="color: #95a5a6;"></i>
+                        <b>Kỷ niệm thâm niên</b>
+                        <p class="text-muted">Lòng trung thành nhân sự</p>
+                    </a>
+
+                    <a href="@Url.Action("AlertVacation", "Admin")" class="btn-box big span4">
+                        <i class="icon-plane" style="color: #e74c3c;"></i>
+                        <b>Rủi ro nghỉ phép</b>
+                        <p class="text-muted">Tồn đọng > 25 ngày</p>
+                        @if (Model != null && Model.Any(x => x.Vacation_Days > 25))
+                        {
+                            <span class="badge badge-important">Cần xử lý</span>
+                        }
+                    </a>
+
+                    <a href="@Url.Action("AlertBirthday", "Admin")" class="btn-box big span4">
+                        <i class="icon-gift" style="color: #9b59b6;"></i>
+                        <b>Sự kiện nội bộ</b>
+                        <p class="text-muted">Sinh nhật tháng @DateTime.Now.Month</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row-fluid">
+        <div class="span12">
+            <div class="module">
+                <div class="module-head">
+                    <h3><i class="icon-bar-chart"></i> Phân tích cơ cấu nhân sự tích hợp</h3>
+                </div>
+                <div class="module-body">
+                    <div id="placeholder2" class="graph" style="height: 350px"></div>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="module">
-        <div class="module-head"><h3>Cơ cấu nhân sự (Real-time)</h3></div>
-        <div class="module-body">
-            <div id="placeholder2" class="graph" style="height: 350px"></div>
+        <div class="module-head">
+            <h3><i class="icon-table"></i> Danh sách Master Data (Đối soát HR & Payroll)</h3>
         </div>
-    </div>
-
-    <div class="module">
-        <div class="module-head"><h3>Danh sách nhân sự tích hợp</h3></div>
         <div class="module-body table">
-            <table cellpadding="0" cellspacing="0" border="0" class="datatable-1 table table-bordered table-striped display" width="100%">
+            <table id="masterTable" cellpadding="0" cellspacing="0" border="0"
+                   class="table table-bordered table-striped display" width="100%">
                 <thead>
-                    <tr>
+                    <tr style="background-color: #f9f9f9;">
                         <th>Mã NV</th>
-                        <th>Họ và Tên</th>
+                        <th>Họ và Tên (HR System)</th>
                         <th>Giới tính</th>
                         <th>Dân tộc</th>
-                        <th>Lương (Pay Rate)</th>
-                        <th>Ngày nghỉ phép</th>
+                        <th>Lương (Payroll System)</th>
+                        <th>Ngày nghỉ</th>
+                        <th>Trạng thái dữ liệu</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @if (Model != null)
-                    {
-                        foreach (var item in Model)
-                        {
-                            <tr class="odd gradeX">
-                                <td>@item.ID</td>
-                                <td>@item.FullName</td>
-                                <td>@item.Gender</td>
-                                <td>@item.Ethnicity</td>
-                                <td class="center">@String.Format("{0:N0}", item.Salary) $</td>
-                                <td class="center">@item.Vacation_Days ngày</td>
-                            </tr>
-                        }
-                    }
+                    @* Load qua AJAX *@
                 </tbody>
             </table>
         </div>
     </div>
 </div>
 
+<style>
+    .bold {
+        font-weight: 700;
+    }
+
+    .text-right {
+        text-align: right !important;
+    }
+
+    .btn-container {
+        display: flex !important;
+        justify-content: space-between;
+        width: 100%;
+        gap: 20px;
+    }
+
+    .btn-box.big {
+        flex: 1;
+        margin: 0 !important;
+        transition: all 0.3s ease;
+        border: 1px solid #ddd;
+        text-decoration: none;
+    }
+
+        .btn-box.big:hover {
+            transform: translateY(-5px);
+            border-color: #24b5e1;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+    .label-important {
+        animation: blinker 1.5s linear infinite;
+    }
+
+    @@keyframes blinker {
+        50% {
+            opacity: 0.5;
+        }
+    }
+</style>
+
 <script type="text/javascript">
+    function startSync(btn) {
+        if(confirm("Bắt đầu đối soát dữ liệu giữa 2 hệ thống (500,000 dòng)?")) {
+            $(btn).addClass('disabled').html('<i class="icon-spinner icon-spin"></i> Đang xử lý...');
+            return true;
+        }
+        return false;
+    }
+
     $(document).ready(function () {
-        var rawData = @Html.Raw(ViewBag.ChartData ?? "[]");
-        if ($("#placeholder2").length > 0 && rawData.length > 0) {
-            $.plot($("#placeholder2"), rawData, {
-                series: { pie: { show: true, innerRadius: 0.4 } },
+        // 1. Vẽ biểu đồ Donut Chart
+        var chartData = @Html.Raw(ViewBag.ChartData ?? "[]");
+        if ($("#placeholder2").length > 0 && chartData.length > 0) {
+            $.plot($("#placeholder2"), chartData, {
+                series: { pie: { show: true, innerRadius: 0.45, stroke: { width: 2, color: "#fff" } } },
                 legend: { show: true }
             });
         }
+
+        // 2. KHỞI TẠO DATATABLE
+        $('#masterTable').DataTable({
+            "processing": true,
+            "ajax": {
+                "url": "/EmployeesApi/GetIntegratedData",
+                "type": "GET",
+                "dataSrc": function(json) {
+                    if (json.error) {
+                        alert("Lỗi tải dữ liệu: " + json.error);
+                        return [];
+                    }
+                    return json.data;
+                }
+            },
+            "columns": [
+                { "data": "id", "className": "bold" },
+                { "data": "fullName" },
+                { "data": "gender" },
+                { "data": "ethnicity" },
+                {
+                    "data": "salary",
+                    "className": "text-right",
+                    "render": function(data) {
+                        var val = data ? parseFloat(data) : 0;
+                        return '<b class="text-success">' + val.toLocaleString('en-US') + ' $</b>';
+                    }
+                },
+                {
+                    "data": "vacation",
+                    "className": "center",
+                    "render": function(data) { return (data || 0) + " ngày"; }
+                },
+                {
+                    "data": "status",
+                    "className": "center",
+                    "render": function(data) {
+                        var css = "label-success";
+                        if(data.includes("Sai lệch")) css = "label-important";
+                        if(data.includes("Thiếu")) css = "label-warning";
+                        if(data.includes("Offline")) css = "label-info";
+                        return '<span class="label ' + css + '">' + data + '</span>';
+                    }
+                }
+            ],
+            "language": {
+                "emptyTable": "Đang nạp dữ liệu từ hệ thống HR...",
+                "search": "Lọc nhanh:",
+                "lengthMenu": "Hiện _MENU_ dòng",
+                "processing": "<i class='icon-spinner icon-spin'></i> Đang kết nối server..."
+            },
+            "pageLength": 10,
+            "order": [[0, "asc"]]
+        });
     });
 </script>

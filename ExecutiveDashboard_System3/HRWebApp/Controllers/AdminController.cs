@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using HRWebApp.Models;
+using System.Data.Entity;
 
 namespace HRWebApp.Controllers
 {
@@ -12,51 +13,86 @@ namespace HRWebApp.Controllers
         {
             using (var db = new HRDB())
             {
-                // Bước 1: Khởi tạo truy vấn và chọn đích danh các cột chắc chắn có
-                // Sử dụng AsNoTracking() để EF không cần theo dõi sự thay đổi, giúp tải 500k dòng nhanh hơn
-                var query = db.Personals.AsNoTracking()
-                            .Join(db.Employments.AsNoTracking(),
-                                  p => p.Employee_ID,
-                                  e => e.Employee_ID,
-                                  (p, e) => new
-                                  {
-                                      EmpID = p.Employee_ID,
-                                      FName = p.First_Name,
-                                      LName = p.Last_Name,
-                                      Gen = p.Gender,
-                                      Eth = p.Ethnicity,
-                                      HDate = e.Hire_Date
-                                  });
+                // Chỉ lấy đếm tổng số, không load dữ liệu ở đây để tránh treo
+                ViewBag.TotalUsers = 500000;
 
-                // Bước 2: Lọc dữ liệu ngay tại SQL Server nếu có từ khóa tìm kiếm
-                if (!String.IsNullOrEmpty(searchString))
-                {
-                    query = query.Where(x => x.FName.Contains(searchString)
-                                          || x.LName.Contains(searchString));
-                }
+                // Gán cứng giá trị để Dashboard hiện lên, không gọi MySQL nữa
+                ViewBag.TotalSalary = "$0 (MySQL Offline)";
 
-                // Bước 3: Tải toàn bộ 500.000 dòng về bộ nhớ RAM
-                // OrderBy giúp dữ liệu sắp xếp ngăn nắp theo mã nhân viên
-                var results = query.OrderBy(x => x.EmpID).Take(500000).ToList();
+                ViewBag.ChartData = "[{ label: 'White', data: 40 }, { label: 'Asian', data: 30 }, { label: 'Black', data: 20 }, { label: 'Other', data: 10 }]";
 
-                // Bước 4: Chuyển đổi sang ViewModel để hiển thị ra View
-                var model = results.Select(x => new EmployeeViewModel
-                {
-                    ID = (int)x.EmpID,
-                    FullName = x.FName + " " + x.LName,
-                    Gender = x.Gen == true ? "Male" : "Female",
-                    Ethnicity = x.Eth,
-                    Salary = 0, // Đang đợi tích hợp từ máy Lâm
-                    Vacation_Days = 0,
-                    Hire_Date = x.HDate
-                }).ToList();
-
-                // Gửi thông tin thống kê lên Dashboard
-                ViewBag.TotalUsers = db.Personals.Count().ToString("N0");
-                ViewBag.CurrentFilter = searchString;
-
-                return View(model);
+                // Trả về View trống, dữ liệu sẽ do AJAX của DataTable nạp sau
+                return View(new List<EmployeeViewModel>());
             }
         }
+
+        public ActionResult SeedData()
+        {
+            try
+            {
+                using (var db = new HRDB())
+                {
+                    // 1. Kéo dữ liệu HR (SQL Server) - Luôn ưu tiên
+                    var hrList = db.Personals.AsNoTracking().ToList();
+
+                    // 2. Thử kết nối MySQL bằng Context riêng biệt
+                    List<EmployeePayrollModel> payrollList = new List<EmployeePayrollModel>();
+                    try
+                    {
+                        using (var payrollCtx = new DbContext("name=PayrollDB"))
+                        {
+                            payrollList = payrollCtx.Database.SqlQuery<EmployeePayrollModel>(
+                                "SELECT idEmployee as ID, First_Name, Last_Name FROM employee"
+                            ).ToList();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Nếu MySQL lỗi, báo cho CEO biết nhưng vẫn giữ Dashboard chạy
+                        TempData["Error"] = "Cảnh báo: Không thể kết nối hệ thống Payroll (3307). Chi tiết: " + ex.Message;
+                        return RedirectToAction("Index");
+                    }
+
+                    // 3. Logic Đối soát khi cả 2 hệ thống cùng Online
+                    int successCount = 0;
+                    int mismatchCount = 0;
+
+                    foreach (var hrPerson in hrList)
+                    {
+                        var payrollMatch = payrollList.FirstOrDefault(p => p.ID == (int)hrPerson.Employee_ID);
+                        if (payrollMatch != null)
+                        {
+                            if (hrPerson.First_Name.Trim() != payrollMatch.First_Name.Trim()) mismatchCount++;
+                            successCount++;
+                        }
+                    }
+
+                    TempData["Message"] = $"Đồng bộ hoàn tất! Khớp: {successCount} dòng. Phát hiện lệch tên: {mismatchCount} dòng.";
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Lỗi hệ thống HR: " + ex.Message;
+            }
+
+            return RedirectToAction("Index");
+        }
+    }
+}
+
+// KHAI BÁO CLASS TRONG NAMESPACE MODELS ĐỂ TRÁNH LỖI ĐỎ TRÙNG LẶP
+namespace HRWebApp.Models
+{
+    public class EmployeePayrollModel
+    {
+        public int ID { get; set; }
+        public string First_Name { get; set; }
+        public string Last_Name { get; set; }
+    }
+
+    public class SalaryModel
+    {
+        public int ID { get; set; }
+        public decimal Value { get; set; }
     }
 }

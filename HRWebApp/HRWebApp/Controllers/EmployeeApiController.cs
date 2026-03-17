@@ -27,16 +27,14 @@ namespace HRWebApp.Controllers
                                     // Ép kiểu (int) để ID hiện số nguyên sạch sẽ, không bị 500001.0
                                     id = (int)p.Employee_ID,
                                     fullName = p.First_Name + " " + p.Last_Name,
-                                    gender = p.Gender == 1 ? "Male" : "Female",
+                                    gender = p.Gender == true ? "Male" : "Female",
                                     ethnicity = p.Ethnicity
                                 };
 
                     if (!string.IsNullOrEmpty(search))
                     {
                         query = query.Where(x => x.fullName.Contains(search));
-                    }
-
-                    // Sắp xếp và lấy 500k dòng nhanh nhất
+                    }                    
                     var data = query.OrderBy(x => x.id).Take(500000).ToList();
 
                     return Ok(data);

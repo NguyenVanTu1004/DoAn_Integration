@@ -22,19 +22,43 @@ import springapp.web.model.Users;
 @Controller
 @RequestMapping(value = "/admin")
 public class PayRateController {
-
+    
     @RequestMapping(value = {"/payrates/list"}, method = RequestMethod.GET)
     public String listUsers(ModelMap model, HttpServletRequest request) {
         Users user = (Users) request.getSession().getAttribute("LOGGEDIN_USER");
         String value = "";
         if (user != null) {
+            int page = 1;
+            int limit = 10;
+
+            String pageStr = request.getParameter("page");
+            if (pageStr != null) {
+                page = Integer.parseInt(pageStr);
+            }
+
+            if (page < 1) {
+                page = 1;
+            }
+
+            int offset = (page - 1) * limit;
+
             try {
+
                 Session session = HibernateUtil.getSessionFactory().getCurrentSession();
                 session.beginTransaction();
-                List listPayRates = session.createQuery("from PayRates").list();
+
+                List listPayRates = session.createQuery("from PayRates")
+                        .setFirstResult(offset)
+                        .setMaxResults(limit)
+                        .list();
+
                 model.addAttribute("listPayRates", listPayRates);
+                model.addAttribute("currentPage", page);
+
                 session.getTransaction().commit();
+
                 value = "admin/listPayRate";
+
             } catch (Exception e) {
                 value = "admin/listPayRate";
             }
@@ -45,4 +69,5 @@ public class PayRateController {
         }
         return value;
     }
+    
 }

@@ -17,33 +17,19 @@
         [Column(TypeName = "numeric")]
         public decimal Employee_ID { get; set; }
 
-        [StringLength(50)]
+        [StringLength(100)] // Khớp với nvarchar(100) trong ảnh
         public string First_Name { get; set; }
 
-        [StringLength(50)]
+        [StringLength(100)]
         public string Last_Name { get; set; }
 
-        [StringLength(50)]
-        public string City { get; set; }
+        // Đã xóa City, State, Email... vì image_2f5fbf.png xác nhận không có các cột này
 
-        [StringLength(50)]
-        public string State { get; set; }
+        public bool? Gender { get; set; } // Kiểu bit trong SQL map với bool trong C#
 
-        [StringLength(50)]
-        public string Email { get; set; }
+        public bool? Shareholder_Status { get; set; } // Kiểu bit trong SQL map với bool trong C#
 
-        [StringLength(50)]
-        public string Phone_Number { get; set; }
-
-        [StringLength(50)]
-        public string Marital_Status { get; set; }
-
-        // Kiểu int? để nhận giá trị 0/1 từ SQL
-        public int? Gender { get; set; }
-
-        public int Shareholder_Status { get; set; }
-
-        [StringLength(50)]
+        [StringLength(100)]
         public string Ethnicity { get; set; }
 
         public DateTime? BirthDate { get; set; }

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 import springapp.web.model.HibernateUtil;
 import springapp.web.model.Users;
 
@@ -28,12 +29,32 @@ public class EmployeeController {
         Users user = (Users) request.getSession().getAttribute("LOGGEDIN_USER");
         String value = "";
         if (user != null) {
+            
+                int page = 1;
+            int limit = 10;
+
+            String pageStr = request.getParameter("page");
+            if (pageStr != null) {
+                page = Integer.parseInt(pageStr);
+            }
+
+            int offset = (page - 1) * limit;
+
             try {
+
                 Session session = HibernateUtil.getSessionFactory().getCurrentSession();
                 session.beginTransaction();
-                List listEmployees = session.createQuery("from Employee").list();
+
+                List listEmployees = session.createQuery("from Employee")
+                        .setFirstResult(offset)   // bắt đầu từ dòng nào
+                        .setMaxResults(limit)     // lấy tối đa bao nhiêu dòng
+                        .list();
+
                 model.addAttribute("listEmployees", listEmployees);
+                model.addAttribute("currentPage", page);
+
                 session.getTransaction().commit();
+
                 value = "admin/listEmployee";
             } catch (Exception e) {
                  value = "admin/listEmployee";
@@ -45,8 +66,8 @@ public class EmployeeController {
         }
         return value;
     }
+    
 }
-
 //@Controller
 //@RequestMapping(value = "/admin")
 //public class EmployeeController {

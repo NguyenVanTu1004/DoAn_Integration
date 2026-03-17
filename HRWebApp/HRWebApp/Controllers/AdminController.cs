@@ -97,7 +97,6 @@ namespace HRWebApp.Controllers
             ViewBag.StatusMessage = "CẢNH BÁO: Nhân viên nghỉ phép trên 25 ngày";
             return View("Index", employees);
         }
-        // SINH NHẬT (Giữ nguyên code chuẩn của Tứ)
         public ActionResult AlertBirthday()
         {
             var employees = new List<EmployeeViewModel>();

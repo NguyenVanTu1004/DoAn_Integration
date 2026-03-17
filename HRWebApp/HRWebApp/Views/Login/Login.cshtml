@@ -2,39 +2,47 @@
     ViewBag.Title = "Login";
     Layout = "~/Views/Shared/_LayoutLogin.cshtml";
 }
+
 <div class="container">
     <div class="row">
         <div class="module module-login span4 offset4">
-            @using (Html.BeginForm())
+            @* Sửa 1: Gộp class vào BeginForm và xóa thẻ form thừa bên dưới *@
+            @using (Html.BeginForm("Login", "Account", FormMethod.Post, new { @class = "form-vertical" }))
             {
-                <form class="form-vertical">
-                    <div class="module-head">
-                        <h3>Sign In</h3>
-                    </div>
-                    <div class="module-body">
-                        <div class="control-group">
-                            <div class="controls row-fluid">
-                                <input class="span12" type="text" id="inputEmail" placeholder="Username">
-                            </div>
-                        </div>
-                        <div class="control-group">
-                            <div class="controls row-fluid">
-                                <input class="span12" type="password" id="inputPassword" placeholder="Password">
-                            </div>
+                <div class="module-head">
+                    <h3>Sign In</h3>
+                </div>
+                <div class="module-body">
+                    <div class="control-group">
+                        <div class="controls row-fluid">
+                            @* Sửa 2: Thêm thuộc tính name để Controller nhận được dữ liệu *@
+                            <input class="span12" type="text" name="username" id="inputEmail" placeholder="Username" required>
                         </div>
                     </div>
-                    <div class="module-foot">
-                        <div class="control-group">
-                            <div class="controls clearfix">
-                                @*<input type="submit" class="btn btn-primary pull-right" />*@
-                                <button type="submit" class="btn btn-primary pull-right">Login</button>
-                                <label class="checkbox">
-                                    <input type="checkbox"> Remember me
-                                </label>
-                            </div>
+                    <div class="control-group">
+                        <div class="controls row-fluid">
+                            @* Sửa 3: Thêm thuộc tính name *@
+                            <input class="span12" type="password" name="password" id="inputPassword" placeholder="Password" required>
                         </div>
                     </div>
-                </form>
+                </div>
+                <div class="module-foot">
+                    <div class="control-group">
+                        <div class="controls clearfix">
+                            <button type="submit" class="btn btn-primary pull-right">Login</button>
+                            <label class="checkbox">
+                                <input type="checkbox" name="rememberMe"> Remember me
+                            </label>
+                        </div>
+                    </div>
+                    @* Hiển thị thông báo lỗi nếu đăng nhập sai *@
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger" style="margin-top:10px; color:red; font-size:12px;">
+                            @ViewBag.Error
+                        </div>
+                    }
+                </div>
             }
         </div>
     </div>

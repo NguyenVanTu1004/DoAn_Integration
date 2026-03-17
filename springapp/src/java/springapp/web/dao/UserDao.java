@@ -7,6 +7,8 @@ package springapp.web.dao;
 
 import java.util.List;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.springframework.stereotype.Repository;
 import springapp.web.model.HibernateUtil;
 import springapp.web.model.Users;
 
@@ -14,7 +16,8 @@ import springapp.web.model.Users;
  *
  * @author AnhDao
  */
-public class UserDao extends Users {
+@Repository
+public class UserDao {
 
     public Boolean CheckUser(String username) {
         Boolean returnBool;
@@ -55,4 +58,19 @@ public class UserDao extends Users {
         }
         return list;
     }
+
+    public Long countUsers() {
+    SessionFactory sf = HibernateUtil.getSessionFactory();
+    if (sf == null) {
+        throw new RuntimeException("SessionFactory is NULL");
+    }
+
+    Session session = sf.openSession();
+    Long total = (Long) session
+        .createQuery("select count(u.userId) from Users u")
+        .uniqueResult();
+    session.close();
+    return total;
+}
+
 }

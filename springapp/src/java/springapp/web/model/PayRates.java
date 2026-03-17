@@ -80,9 +80,11 @@ public class PayRates  implements java.io.Serializable {
         this.ptLevelC = ptLevelC;
     }
 
-
-
-
+    
 }
+
+
+
+
 
 

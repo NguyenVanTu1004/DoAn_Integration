@@ -13,10 +13,10 @@
                         <a href="#" class="btn-box big span4"><i class=" icon-random"></i><b>65%</b>
                             <p class="text-muted">
                                 Growth</p>
-                        </a><a href="#" class="btn-box big span4"><i class="icon-user"></i><b>15</b>
+                        </a><a href="#" class="btn-box big span4"><i class="icon-user"></i><b>${totalUsers}</b>
                             <p class="text-muted">
-                                New Users</p>
-                        </a><a href="#" class="btn-box big span4"><i class="icon-money"></i><b>15,152</b>
+                                Total Users</p>
+                        </a><a href="#" class="btn-box big span4"><i class="icon-money"></i><b>${totalPayroll}</b>
                             <p class="text-muted">
                                 Profit</p>
                         </a>
