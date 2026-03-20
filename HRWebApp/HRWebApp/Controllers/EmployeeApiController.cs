@@ -1,49 +1,57 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Web.Http; // QUAN TRỌNG: Chỉ dùng thư viện này cho API
+using System.Web.Http;
 using HRWebApp.Models;
+using System.Data.Entity;
+using System.Net.Http;
 
 namespace HRWebApp.Controllers
 {
     [RoutePrefix("api/employees")]
     public class EmployeeApiController : ApiController
     {
+        private HRDB db = new HRDB();
+
         [HttpGet]
         [Route("getall")]
-        public IHttpActionResult GetAllEmployees(string search = "")
+        public IHttpActionResult GetAll()
         {
-            using (var db = new HRDB())
+            try
             {
-                try
-                {
-                    // Truy vấn đúng 4 trường dữ liệu cũ của Tứ
-                    var query = from p in db.Personals.AsNoTracking()
-                                join e in db.Employments.AsNoTracking() on p.Employee_ID equals e.Employee_ID
-                                select new
-                                {
-                                    // Ép kiểu (int) để ID hiện số nguyên sạch sẽ, không bị 500001.0
-                                    id = (int)p.Employee_ID,
-                                    fullName = p.First_Name + " " + p.Last_Name,
-                                    gender = p.Gender == true ? "Male" : "Female",
-                                    ethnicity = p.Ethnicity
-                                };
+                // TỐI ƯU: Tắt các tính năng không cần thiết để xuất dữ liệu thô nhanh nhất
+                db.Configuration.ProxyCreationEnabled = false;
+                db.Configuration.LazyLoadingEnabled = false;
+                db.Database.CommandTimeout = 300; // Đợi 5 phút cho 500k dòng
 
-                    if (!string.IsNullOrEmpty(search))
-                    {
-                        query = query.Where(x => x.fullName.Contains(search));
-                    }                    
-                    var data = query.OrderBy(x => x.id).Take(500000).ToList();
+                // Truy vấn JOIN và trả về List trực tiếp
+                var data = (from p in db.Personals.AsNoTracking()
+                            join e in db.Employments.AsNoTracking() on p.Employee_ID equals e.Employee_ID into details
+                            from det in details.DefaultIfEmpty()
+                            orderby p.Employee_ID ascending
+                            select new
+                            {
+                                id = (int)p.Employee_ID,
+                                fullName = (p.First_Name + " " + p.Last_Name).Trim(),
+                                gender = p.Gender == true,
+                                ethnicity = p.Ethnicity,
+                                salaryInSql = (decimal?)(det != null ? det.Salary : 0) ?? 0,
+                                vacationDays = (int?)(det != null ? det.Vacation_Days : 0) ?? 0,
+                                status = det != null ? det.Employment_Status : "Active"
+                            }).ToList();
 
-                    return Ok(data);
-                }
-                catch (Exception ex)
-                {
-                    return InternalServerError(ex);
-                }
+                return Ok(data);
             }
+            catch (Exception ex)
+            {
+                return BadRequest("Lỗi xuất mảng dữ liệu: " + ex.Message);
+            }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing) db.Dispose();
+            base.Dispose(disposing);
         }
     }
 }

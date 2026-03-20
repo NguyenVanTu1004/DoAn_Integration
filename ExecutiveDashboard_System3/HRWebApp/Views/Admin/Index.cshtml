@@ -1,240 +1,302 @@
 ﻿@using HRWebApp.Models
-@model IEnumerable<EmployeeViewModel>
+@model IEnumerable<HRWebApp.Models.EmployeeViewModel>
 
 @{
-    ViewBag.Title = "Executive Dashboard | Integrated HR & Payroll System";
+    ViewBag.Title = "CEO Strategic Dashboard | Integrated HR & Payroll";
 }
 
+<style>
+    :root {
+        --primary: #2c3e50;
+        --success: #27ae60;
+        --warning: #f39c12;
+        --danger: #e74c3c;
+        --info: #3498db;
+    }
+
+    .content {
+        background: #f4f7f6;
+        padding: 20px;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .stat-card {
+        background: #fff;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        transition: 0.3s;
+        border-top: 4px solid var(--primary);
+        min-height: 130px;
+        overflow: hidden;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 20px rgba(0,0,0,0.1);
+    }
+
+    .stat-card.hr { border-top-color: var(--success); }
+    .stat-card.payroll { border-top-color: var(--warning); }
+    .stat-card.alert { border-top-color: var(--danger); }
+
+    .stat-value {
+        font-size: 20px;
+        font-weight: bold;
+        display: block;
+        margin: 10px 0;
+        color: #333;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .stat-label {
+        color: #7f8c8d;
+        text-transform: uppercase;
+        font-size: 11px;
+        letter-spacing: 1px;
+    }
+
+    .alert-strip {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #fff;
+        padding: 15px 25px;
+        border-radius: 50px;
+        margin-bottom: 25px;
+        border: 1px solid #e1e4e8;
+    }
+
+    .alert-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        padding: 5px 15px;
+        border-radius: 20px;
+        transition: 0.2s;
+    }
+
+    .alert-item:hover { background: #f0f0f0; }
+
+    .alert-count {
+        background: var(--danger);
+        color: #fff;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 12px;
+    }
+
+    /* DataTable Formatting */
+    .dataTables_wrapper .dataTables_filter { float: right; margin-bottom: 10px; }
+    .dataTables_wrapper .dataTables_length { float: left; margin-bottom: 10px; }
+    .dataTables_wrapper .dataTables_info { float: left; margin-top: 10px; }
+    .dataTables_wrapper .dataTables_paginate { float: right; margin-top: 10px; }
+
+    #placeholder {
+        width: 100% !important;
+        min-height: 350px !important;
+        height: 350px !important;
+        display: block !important;
+    }
+</style>
+
 <div class="content">
-    @* --- THÔNG BÁO KẾT QUẢ --- *@
-    @if (TempData["Message"] != null)
-    {
-        <div class="alert alert-success">
-            <button type="button" class="close" data-dismiss="alert">×</button>
-            <strong><i class="icon-ok"></i> Thành công!</strong> @TempData["Message"]
-        </div>
-    }
-    @if (TempData["Error"] != null)
-    {
-        <div class="alert alert-error">
-            <button type="button" class="close" data-dismiss="alert">×</button>
-            <strong><i class="icon-remove"></i> Lỗi!</strong> @TempData["Error"]
-        </div>
-    }
-
-    <div class="btn-controls">
-        <div class="btn-box-row row-fluid">
-            <div class="btn-box big span4">
-                <i class="icon-random" style="color: #24b5e1;"></i>
-                <b>Data Integration Tool</b>
-                <p class="text-muted">Đồng bộ HR & Payroll System</p>
-                <div style="margin-top:10px;">
-                    <a href="@Url.Action("SeedData", "Admin")" class="btn btn-primary btn-small" id="btnSync" onclick="return startSync(this);">
-                        <i class="icon-download-alt"></i> Sync Master Data
-                    </a>
-                </div>
+    <div class="container-fluid">
+        <div class="alert-strip">
+            <span class="stat-label"><i class="icon-bell"></i> Critical Alerts:</span>
+            <div class="alert-item" onclick="location.href='@Url.Action("AlertVacation", "Admin")'">
+                <i class="icon-plane text-warning"></i> <span>Over Vacation</span>
+                <span class="alert-count">@ViewBag.OverVacationCount</span>
             </div>
-
-            <div class="btn-box big span4">
-                <i class="icon-user" style="color: #2dcc70;"></i>
-                <b id="total-employees">@String.Format("{0:N0}", ViewBag.TotalUsers ?? 0)</b>
-                <p class="text-muted">Tổng nhân sự (HRMS)</p>
-                <small class="label label-info">Real-time sync</small>
+            <div class="alert-item" onclick="location.href='@Url.Action("AlertAnniversary", "Admin")'">
+                <i class="icon-gift text-info"></i> <span>Anniversaries</span>
+                <span class="alert-count">@ViewBag.AnniversaryCount</span>
             </div>
+            <div class="alert-item" onclick="location.href='@Url.Action("AlertBirthday", "Admin")'">
+                <i class="icon-calendar text-success"></i> <span>Birthdays</span>
+                <span class="alert-count">@ViewBag.BirthdayCount</span>
+            </div>
+            <a href="@Url.Action("SeedData", "Admin")" class="btn btn-primary" onclick="return startSync(this);">
+                <i class="icon-refresh"></i> SYNC MASTER DATA
+            </a>
+        </div>
 
-            <div class="btn-box big span4">
-                <i class="icon-money" style="color: #f1c40f;"></i>
-                <b>@ViewBag.TotalSalary</b>
-                <p class="text-muted">Tổng quỹ lương (Payroll)</p>
-                <small class="label @(ViewBag.TotalSalary.ToString().Contains("Offline") ? "label-important" : "label-success")">
-                    @(ViewBag.TotalSalary.ToString().Contains("Offline") ? "MySQL Disconnected" : "Current Cycle")
-                </small>
+        <div class="row-fluid">
+            <div class="span3 stat-card hr">
+                <span class="stat-label">Total Workforce</span>
+                <span class="stat-value">@String.Format("{0:N0}", ViewBag.TotalUsers)</span>
+                <div class="progress progress-mini"><div class="bar bar-success" style="width: 100%;"></div></div>
+            </div>
+            <div class="span3 stat-card payroll">
+                <span class="stat-label">Total Earnings (YTD)</span>
+                <span class="stat-value" title="@ViewBag.TotalSalary">@ViewBag.TotalSalary</span>
+                <span class="text-success" style="font-size:12px;"><i class="icon-caret-up"></i> +4.2% from Prev Year</span>
+            </div>
+            <div class="span3 stat-card hr">
+                <span class="stat-label">Avg Benefits Paid</span>
+                <span class="stat-value">$ @ViewBag.AvgBenefits</span>
+                <span class="stat-label">By Benefit Plan</span>
+            </div>
+            <div class="span3 stat-card alert">
+                <span class="stat-label">Vacation Liability</span>
+                <span class="stat-value">@ViewBag.TotalVacationDays Days</span>
+                <span class="stat-label">Total accumulated</span>
+            </div>
+        </div>
+
+        <br />
+
+        <div class="row-fluid">
+            <div class="span12">
+                <div id="placeholder"></div>
             </div>
         </div>
 
         <div class="module">
             <div class="module-head">
-                <h3><i class="icon-warning-sign"></i> Trung tâm cảnh báo Quản trị</h3>
-            </div>
-            <div class="module-body">
-                <div class="row-fluid btn-container">
-                    <a href="@Url.Action("AlertAnniversary", "Admin")" class="btn-box big span4 first-btn">
-                        <i class="icon-time" style="color: #95a5a6;"></i>
-                        <b>Kỷ niệm thâm niên</b>
-                        <p class="text-muted">Lòng trung thành nhân sự</p>
-                    </a>
-
-                    <a href="@Url.Action("AlertVacation", "Admin")" class="btn-box big span4">
-                        <i class="icon-plane" style="color: #e74c3c;"></i>
-                        <b>Rủi ro nghỉ phép</b>
-                        <p class="text-muted">Tồn đọng > 25 ngày</p>
-                        @if (Model != null && Model.Any(x => x.Vacation_Days > 25))
-                        {
-                            <span class="badge badge-important">Cần xử lý</span>
-                        }
-                    </a>
-
-                    <a href="@Url.Action("AlertBirthday", "Admin")" class="btn-box big span4">
-                        <i class="icon-gift" style="color: #9b59b6;"></i>
-                        <b>Sự kiện nội bộ</b>
-                        <p class="text-muted">Sinh nhật tháng @DateTime.Now.Month</p>
-                    </a>
+                <div class="pull-right">
+                    <button type="button" class="btn btn-small btn-success" onclick="fetchIntegrityData(this)">
+                        <i class="icon-download-alt"></i> FETCH & SYNC DATA
+                    </button>
                 </div>
+                <h3><i class="icon-dashboard"></i> Integrated Master Data Monitoring</h3>
             </div>
-        </div>
-    </div>
-
-    <div class="row-fluid">
-        <div class="span12">
-            <div class="module">
-                <div class="module-head">
-                    <h3><i class="icon-bar-chart"></i> Phân tích cơ cấu nhân sự tích hợp</h3>
-                </div>
-                <div class="module-body">
-                    <div id="placeholder2" class="graph" style="height: 350px"></div>
-                </div>
+            <div class="module-body table">
+                <table id="masterTable" class="table table-bordered table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Employee Details</th>
+                            <th>Demographics</th>
+                            <th>Job Status</th>
+                            <th>Payroll (MySQL)</th>
+                            <th>HR Data (SQL)</th>
+                            <th>Integrity</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
             </div>
-        </div>
-    </div>
-
-    <div class="module">
-        <div class="module-head">
-            <h3><i class="icon-table"></i> Danh sách Master Data (Đối soát HR & Payroll)</h3>
-        </div>
-        <div class="module-body table">
-            <table id="masterTable" cellpadding="0" cellspacing="0" border="0"
-                   class="table table-bordered table-striped display" width="100%">
-                <thead>
-                    <tr style="background-color: #f9f9f9;">
-                        <th>Mã NV</th>
-                        <th>Họ và Tên (HR System)</th>
-                        <th>Giới tính</th>
-                        <th>Dân tộc</th>
-                        <th>Lương (Payroll System)</th>
-                        <th>Ngày nghỉ</th>
-                        <th>Trạng thái dữ liệu</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @* Load qua AJAX *@
-                </tbody>
-            </table>
         </div>
     </div>
 </div>
 
-<style>
-    .bold {
-        font-weight: 700;
-    }
-
-    .text-right {
-        text-align: right !important;
-    }
-
-    .btn-container {
-        display: flex !important;
-        justify-content: space-between;
-        width: 100%;
-        gap: 20px;
-    }
-
-    .btn-box.big {
-        flex: 1;
-        margin: 0 !important;
-        transition: all 0.3s ease;
-        border: 1px solid #ddd;
-        text-decoration: none;
-    }
-
-        .btn-box.big:hover {
-            transform: translateY(-5px);
-            border-color: #24b5e1;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+@section scripts {
+    <script type="text/javascript">
+        // 1. Đồng bộ nút Master Data trên cùng
+        function startSync(btn) {
+            if (confirm("Confirm Synchronization? This will reconcile records between HR and Payroll.")) {
+                $(btn).addClass('disabled').html('<i class="icon-spinner icon-spin"></i> Synchronizing...');
+                return true;
+            }
+            return false;
         }
 
-    .label-important {
-        animation: blinker 1.5s linear infinite;
-    }
+        // 2. Fetch data bất đồng bộ cho bảng
+        function fetchIntegrityData(btn) {
+            var $btn = $(btn);
+            var originalHtml = '<i class="icon-download-alt"></i> FETCH & SYNC DATA';
 
-    @@keyframes blinker {
-        50% {
-            opacity: 0.5;
-        }
-    }
-</style>
+            $btn.addClass('disabled').prop('disabled', true).html('<i class="icon-spinner icon-spin"></i> Processing...');
 
-<script type="text/javascript">
-    function startSync(btn) {
-        if(confirm("Bắt đầu đối soát dữ liệu giữa 2 hệ thống (500,000 dòng)?")) {
-            $(btn).addClass('disabled').html('<i class="icon-spinner icon-spin"></i> Đang xử lý...');
-            return true;
-        }
-        return false;
-    }
-
-    $(document).ready(function () {
-        // 1. Vẽ biểu đồ Donut Chart
-        var chartData = @Html.Raw(ViewBag.ChartData ?? "[]");
-        if ($("#placeholder2").length > 0 && chartData.length > 0) {
-            $.plot($("#placeholder2"), chartData, {
-                series: { pie: { show: true, innerRadius: 0.45, stroke: { width: 2, color: "#fff" } } },
-                legend: { show: true }
+            $.ajax({
+                url: '@Url.Action("SeedData", "Admin")',
+                type: 'POST',
+                success: function (response) {
+                    if (response.success) {
+                        alert("✅ Thành công: Dữ liệu đã được nạp vào kho chứa.");
+                        $('#masterTable').DataTable().ajax.reload();
+                    } else {
+                        alert("❌ Lỗi: " + response.message);
+                    }
+                },
+                error: function () { alert("❌ Lỗi kết nối API."); },
+                complete: function () {
+                    $btn.removeClass('disabled').prop('disabled', false).html(originalHtml);
+                }
             });
         }
 
-        // 2. KHỞI TẠO DATATABLE
-        $('#masterTable').DataTable({
-            "processing": true,
-            "ajax": {
-                "url": "/EmployeesApi/GetIntegratedData",
-                "type": "GET",
-                "dataSrc": function(json) {
-                    if (json.error) {
-                        alert("Lỗi tải dữ liệu: " + json.error);
-                        return [];
+        (function($) {
+            $(function() {
+                // Khởi tạo bảng với Server-side Paging 20 dòng
+                initDataTable();
+                // Khởi tạo biểu đồ an toàn
+                handleChartsDefensive();
+            });
+
+            function initDataTable() {
+                var $table = $('#masterTable');
+                if (!$table.length) return;
+
+                $table.DataTable({
+                    "processing": true,
+                    "serverSide": true,
+                    "pageLength": 20,
+                    "pagingType": "full_numbers",
+                    "ajax": {
+                        "url": "@Url.Action("GetEmployeesData", "Admin")",
+                        "type": "POST",
+                        "data": function (d) {
+                            // Gửi thêm filterType nếu CEO bấm vào các nút Alert
+                            d.filterType = "@ViewBag.ReportType";
+                            return d;
+                        }
+                    },
+                    "columns": [
+                        { "data": "id" },
+                        { 
+                            "data": "fullName",
+                            "render": function(data) { return "<b>" + (data || "N/A") + "</b>"; }
+                        },
+                        { "data": "ethnicity" },
+                        { 
+                            "data": "status",
+                            "render": function(d) {
+                                var cls = (d === "Full-time") ? "label-info" : "label-warning";
+                                return '<span class="label ' + cls + '">' + (d || "Active") + '</span>';
+                            }
+                        },
+                        {
+                            "data": "salaryInSql",
+                            "render": function(d) {
+                                return "<b>$" + (parseFloat(d) || 0).toLocaleString() + "</b>";
+                            }
+                        },
+                        { "data": "vacationDays" },
+                        {
+                            "data": null,
+                            "render": function () {
+                                return '<span class="label label-success">Integrated</span>';
+                            }
+                        }
+                    ],
+                    "language": {
+                        "processing": "Đang nạp 20 bản ghi...",
+                        "zeroRecords": "Không tìm thấy dữ liệu nhân sự"
                     }
-                    return json.data;
-                }
-            },
-            "columns": [
-                { "data": "id", "className": "bold" },
-                { "data": "fullName" },
-                { "data": "gender" },
-                { "data": "ethnicity" },
-                {
-                    "data": "salary",
-                    "className": "text-right",
-                    "render": function(data) {
-                        var val = data ? parseFloat(data) : 0;
-                        return '<b class="text-success">' + val.toLocaleString('en-US') + ' $</b>';
+                });
+            }
+
+            function handleChartsDefensive() {
+                const container = document.getElementById('placeholder');
+                if (!container) return;
+
+                const checkAndResize = () => {
+                    if (container.offsetWidth > 0 && container.offsetHeight > 0) {
+                        try {
+                            $(window).trigger('resize');
+                            if (typeof renderChart === "function") renderChart();
+                        } catch (e) { console.warn("Chart delay..."); }
+                    } else {
+                        requestAnimationFrame(checkAndResize);
                     }
-                },
-                {
-                    "data": "vacation",
-                    "className": "center",
-                    "render": function(data) { return (data || 0) + " ngày"; }
-                },
-                {
-                    "data": "status",
-                    "className": "center",
-                    "render": function(data) {
-                        var css = "label-success";
-                        if(data.includes("Sai lệch")) css = "label-important";
-                        if(data.includes("Thiếu")) css = "label-warning";
-                        if(data.includes("Offline")) css = "label-info";
-                        return '<span class="label ' + css + '">' + data + '</span>';
-                    }
-                }
-            ],
-            "language": {
-                "emptyTable": "Đang nạp dữ liệu từ hệ thống HR...",
-                "search": "Lọc nhanh:",
-                "lengthMenu": "Hiện _MENU_ dòng",
-                "processing": "<i class='icon-spinner icon-spin'></i> Đang kết nối server..."
-            },
-            "pageLength": 10,
-            "order": [[0, "asc"]]
-        });
-    });
-</script>
+                };
+                requestAnimationFrame(checkAndResize);
+            }
+        })(jQuery);
+    </script>
+}

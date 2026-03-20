@@ -1,3 +1,5 @@
+C:\DoAnIntegration\ExecutiveDashboard_System3\HRWebApp\obj\Debug\ExecutiveDashboard_System3.csprojAssemblyReference.cache
+C:\DoAnIntegration\ExecutiveDashboard_System3\HRWebApp\obj\Debug\ExecutiveDashboard_System3.csproj.CoreCompileInputs.cache
 C:\DoAnIntegration\ExecutiveDashboard_System3\HRWebApp\bin\ExecutiveDashboard_System3.dll.config
 C:\DoAnIntegration\ExecutiveDashboard_System3\HRWebApp\bin\ExecutiveDashboard_System3.dll
 C:\DoAnIntegration\ExecutiveDashboard_System3\HRWebApp\bin\ExecutiveDashboard_System3.pdb
@@ -18,7 +20,6 @@ C:\DoAnIntegration\ExecutiveDashboard_System3\HRWebApp\bin\System.Web.Webpages.D
 C:\DoAnIntegration\ExecutiveDashboard_System3\HRWebApp\bin\System.Web.Webpages.Razor.xml
 C:\DoAnIntegration\ExecutiveDashboard_System3\HRWebApp\bin\System.Web.Helpers.xml
 C:\DoAnIntegration\ExecutiveDashboard_System3\HRWebApp\bin\System.Web.Mvc.xml
-C:\DoAnIntegration\ExecutiveDashboard_System3\HRWebApp\obj\Debug\ExecutiveDashboard_System3.csproj.CoreCompileInputs.cache
 C:\DoAnIntegration\ExecutiveDashboard_System3\HRWebApp\obj\Debug\ExecutiveDashboard_System3.csproj.CopyComplete
 C:\DoAnIntegration\ExecutiveDashboard_System3\HRWebApp\obj\Debug\ExecutiveDashboard_System3.dll
 C:\DoAnIntegration\ExecutiveDashboard_System3\HRWebApp\obj\Debug\ExecutiveDashboard_System3.pdb

@@ -1,7 +1,6 @@
 ﻿namespace HRWebApp.Models
 {
     using System;
-    using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
 
@@ -12,15 +11,11 @@
         [Column(TypeName = "numeric")]
         public decimal Employee_ID { get; set; }
 
-        // Sửa lỗi CS1061 cho 'Salary' (Dòng 74 trong Controller)
         [Column(TypeName = "money")]
         public decimal? Salary { get; set; }
 
-        // Sửa lỗi CS1061 cho 'HireDate' (Dòng 78, 79 trong Controller)
-        // Lưu ý: Tên phải là HireDate (không có dấu gạch dưới) để khớp với code Controller của bạn
-        public DateTime? HireDate { get; set; }
+        public DateTime? Hire_Date { get; set; }
 
-        // Sửa lỗi CS1061 cho 'Vacation_Days' (Dòng 37, 72 trong Controller)
         public int? Vacation_Days { get; set; }
 
         [StringLength(50)]
@@ -29,7 +24,8 @@
         [StringLength(50)]
         public string Benefit_Plan { get; set; }
 
-        // Thiết lập mối quan hệ với bảng Personal
+        // ĐỊNH NGHĨA QUAN HỆ: Employee_ID ở đây trỏ trực tiếp sang Employee_ID của Personal
+        [ForeignKey("Employee_ID")]
         public virtual Personal Personal { get; set; }
     }
 }
