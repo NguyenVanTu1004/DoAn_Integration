@@ -20,6 +20,7 @@
         font-family: 'Segoe UI', sans-serif;
     }
 
+    /* KPI Cards Design */
     .stat-card {
         background: #fff;
         border-radius: 8px;
@@ -28,42 +29,49 @@
         transition: 0.3s;
         border-top: 4px solid var(--primary);
         min-height: 130px;
-        overflow: hidden;
+        position: relative;
     }
 
-    .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 20px rgba(0,0,0,0.1);
-    }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.1);
+        }
 
-    .stat-card.hr { border-top-color: var(--success); }
-    .stat-card.payroll { border-top-color: var(--warning); }
-    .stat-card.alert { border-top-color: var(--danger); }
+        .stat-card.hr {
+            border-top-color: var(--success);
+        }
+
+        .stat-card.payroll {
+            border-top-color: var(--warning);
+        }
+
+        .stat-card.alert {
+            border-top-color: var(--danger);
+        }
 
     .stat-value {
-        font-size: 20px;
+        font-size: 24px;
         font-weight: bold;
         display: block;
         margin: 10px 0;
-        color: #333;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        color: #2c3e50;
     }
 
     .stat-label {
         color: #7f8c8d;
         text-transform: uppercase;
         font-size: 11px;
-        letter-spacing: 1px;
+        letter-spacing: 1.2px;
+        font-weight: 600;
     }
 
+    /* Alert Strip Styling */
     .alert-strip {
         display: flex;
         justify-content: space-between;
         align-items: center;
         background: #fff;
-        padding: 15px 25px;
+        padding: 12px 25px;
         border-radius: 50px;
         margin-bottom: 25px;
         border: 1px solid #e1e4e8;
@@ -72,108 +80,147 @@
     .alert-item {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
         cursor: pointer;
-        padding: 5px 15px;
+        padding: 6px 15px;
         border-radius: 20px;
         transition: 0.2s;
     }
 
-    .alert-item:hover { background: #f0f0f0; }
+        .alert-item:hover {
+            background: #f8f9fa;
+            color: var(--info);
+        }
 
     .alert-count {
         background: var(--danger);
         color: #fff;
         padding: 2px 8px;
         border-radius: 10px;
-        font-size: 12px;
+        font-size: 11px;
+        font-weight: bold;
     }
 
-    /* DataTable Formatting */
-    .dataTables_wrapper .dataTables_filter { float: right; margin-bottom: 10px; }
-    .dataTables_wrapper .dataTables_length { float: left; margin-bottom: 10px; }
-    .dataTables_wrapper .dataTables_info { float: left; margin-top: 10px; }
-    .dataTables_wrapper .dataTables_paginate { float: right; margin-top: 10px; }
+    /* Chart & Table Module */
+    .module {
+        background: #fff;
+        border: 1px solid #e1e4e8;
+        border-radius: 4px;
+        margin-bottom: 20px;
+    }
+
+    .module-head {
+        background: #fbfbfb;
+        padding: 10px 15px;
+        border-bottom: 1px solid #e1e4e8;
+    }
+
+        .module-head h3 {
+            font-size: 14px;
+            color: #333;
+            margin: 0;
+            line-height: 30px;
+        }
 
     #placeholder {
         width: 100% !important;
-        min-height: 350px !important;
         height: 350px !important;
-        display: block !important;
+        display: block;
+    }
+
+    .label-sync {
+        background-color: #27ae60 !important;
+        font-size: 10px;
+        text-transform: uppercase;
     }
 </style>
 
 <div class="content">
     <div class="container-fluid">
+
+        @* --- PHẦN 1: THÔNG BÁO TỪ HỆ THỐNG ĐỐI SOÁT --- *@
         <div class="alert-strip">
-            <span class="stat-label"><i class="icon-bell"></i> Critical Alerts:</span>
-            <div class="alert-item" onclick="location.href='@Url.Action("AlertVacation", "Admin")'">
-                <i class="icon-plane text-warning"></i> <span>Over Vacation</span>
+            <span class="stat-label"><i class="icon-bolt"></i> IQ-RECONCILE ALERTS:</span>
+            <div class="alert-item" onclick="filterTable('Vacation')">
+                <i class="icon-plane text-warning"></i> <span>Leave Liability</span>
                 <span class="alert-count">@ViewBag.OverVacationCount</span>
             </div>
-            <div class="alert-item" onclick="location.href='@Url.Action("AlertAnniversary", "Admin")'">
-                <i class="icon-gift text-info"></i> <span>Anniversaries</span>
+            <div class="alert-item" onclick="filterTable('Anniversary')">
+                <i class="icon-trophy text-info"></i> <span>Anniversaries</span>
                 <span class="alert-count">@ViewBag.AnniversaryCount</span>
             </div>
-            <div class="alert-item" onclick="location.href='@Url.Action("AlertBirthday", "Admin")'">
-                <i class="icon-calendar text-success"></i> <span>Birthdays</span>
+            <div class="alert-item" onclick="filterTable('Birthday')">
+                <i class="icon-gift text-success"></i> <span>Birthdays</span>
                 <span class="alert-count">@ViewBag.BirthdayCount</span>
             </div>
-            <a href="@Url.Action("SeedData", "Admin")" class="btn btn-primary" onclick="return startSync(this);">
-                <i class="icon-refresh"></i> SYNC MASTER DATA
-            </a>
+            <button type="button" class="btn btn-primary" onclick="triggerMasterSync(this)">
+                <i class="icon-refresh"></i> RUN FULL RECONCILIATION
+            </button>
         </div>
 
+        @* --- PHẦN 2: CHỈ SỐ KPI ĐÃ HỢP NHẤT (INTEGRATED) --- *@
         <div class="row-fluid">
             <div class="span3 stat-card hr">
-                <span class="stat-label">Total Workforce</span>
+                <span class="stat-label">Verified Workforce</span>
                 <span class="stat-value">@String.Format("{0:N0}", ViewBag.TotalUsers)</span>
                 <div class="progress progress-mini"><div class="bar bar-success" style="width: 100%;"></div></div>
             </div>
             <div class="span3 stat-card payroll">
-                <span class="stat-label">Total Earnings (YTD)</span>
-                <span class="stat-value" title="@ViewBag.TotalSalary">@ViewBag.TotalSalary</span>
-                <span class="text-success" style="font-size:12px;"><i class="icon-caret-up"></i> +4.2% from Prev Year</span>
+                <span class="stat-label">Total Payroll Liability</span>
+                <span class="stat-value">@ViewBag.TotalSalary</span>
+                <span class="text-success" style="font-size:11px;"><i class="icon-ok-sign"></i> 100% Reconciled</span>
             </div>
             <div class="span3 stat-card hr">
-                <span class="stat-label">Avg Benefits Paid</span>
+                <span class="stat-label">Avg Benefit Package</span>
                 <span class="stat-value">$ @ViewBag.AvgBenefits</span>
-                <span class="stat-label">By Benefit Plan</span>
+                <span class="stat-label" style="font-size:9px">Consolidated Plan</span>
             </div>
             <div class="span3 stat-card alert">
-                <span class="stat-label">Vacation Liability</span>
+                <span class="stat-label">Financial Liability (Leave)</span>
                 <span class="stat-value">@ViewBag.TotalVacationDays Days</span>
-                <span class="stat-label">Total accumulated</span>
+                <span class="stat-label" style="font-size:9px">Estimated payoff value</span>
             </div>
         </div>
 
         <br />
 
+        @* --- PHẦN 3: PHÂN TÍCH CHIẾN LƯỢC CHO CEO --- *@
         <div class="row-fluid">
             <div class="span12">
-                <div id="placeholder"></div>
+                <div class="module">
+                    <div class="module-head">
+                        <div class="pull-right">
+                            <select id="chartSelector" style="margin-top:-5px; height:25px; font-size:11px; width:220px;">
+                                <option value="ethnicity">Distribution by Ethnicity</option>
+                                <option value="gender">Gender Diversity Ratio</option>
+                                <option value="pay_rate">Pay Rate Tier Analysis</option>
+                            </select>
+                        </div>
+                        <h3><i class="icon-bar-chart"></i> Executive Data Insight</h3>
+                    </div>
+                    <div class="module-body">
+                        <div id="placeholder"></div>
+                    </div>
+                </div>
             </div>
         </div>
 
+        @* --- PHẦN 4: MASTER INTEGRATED TABLE --- *@
         <div class="module">
             <div class="module-head">
-                <div class="pull-right">
-                    <button type="button" class="btn btn-small btn-success" onclick="fetchIntegrityData(this)">
-                        <i class="icon-download-alt"></i> FETCH & SYNC DATA
-                    </button>
-                </div>
-                <h3><i class="icon-dashboard"></i> Integrated Master Data Monitoring</h3>
+                <h3><i class="icon-table"></i> Master Integrated Data Set (Post-Reconciliation)</h3>
             </div>
             <div class="module-body table">
                 <table id="masterTable" class="table table-bordered table-striped" style="width:100%">
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Employee Details</th>
-                            <th>Demographics</th>
-                            <th>Job Status</th>
-                            <th>Payroll (MySQL)</th>
-                            <th>HR Data (SQL)</th>
+                            <th>Employee Name</th>
+                            <th>Gender</th>
+                            <th>Ethnicity</th>
+                            <th>Status</th>
+                            <th>Verified Salary</th>
+                            <th>Leave Bal.</th>
                             <th>Integrity</th>
                         </tr>
                     </thead>
@@ -185,118 +232,94 @@
 </div>
 
 @section scripts {
+    @* Thứ tự nạp Script tối ưu *@
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.css">
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.pie.min.js"></script>
+
     <script type="text/javascript">
-        // 1. Đồng bộ nút Master Data trên cùng
-        function startSync(btn) {
-            if (confirm("Confirm Synchronization? This will reconcile records between HR and Payroll.")) {
-                $(btn).addClass('disabled').html('<i class="icon-spinner icon-spin"></i> Synchronizing...');
-                return true;
-            }
-            return false;
-        }
+        var masterTable;
 
-        // 2. Fetch data bất đồng bộ cho bảng
-        function fetchIntegrityData(btn) {
-            var $btn = $(btn);
-            var originalHtml = '<i class="icon-download-alt"></i> FETCH & SYNC DATA';
-
-            $btn.addClass('disabled').prop('disabled', true).html('<i class="icon-spinner icon-spin"></i> Processing...');
-
-            $.ajax({
-                url: '@Url.Action("SeedData", "Admin")',
-                type: 'POST',
-                success: function (response) {
-                    if (response.success) {
-                        alert("✅ Thành công: Dữ liệu đã được nạp vào kho chứa.");
-                        $('#masterTable').DataTable().ajax.reload();
-                    } else {
-                        alert("❌ Lỗi: " + response.message);
+        $(document).ready(function() {
+            // 1. KHỞI TẠO BẢNG MASTER (Sử dụng API của Hệ thống 3)
+            masterTable = $('#masterTable').DataTable({
+                "processing": true,
+                "serverSide": true,
+                "pageLength": 10,
+                "ajax": {
+                    "url": "@Url.Action("GetEmployeesData", "Admin")",
+                    "type": "POST",
+                    "data": function (d) {
+                        d.filterType = window.currentFilter || 'All';
+                        return d;
                     }
                 },
-                error: function () { alert("❌ Lỗi kết nối API."); },
-                complete: function () {
-                    $btn.removeClass('disabled').prop('disabled', false).html(originalHtml);
+                "columns": [
+                    { "data": "id" },
+                    { "data": "fullName", "render": function(d) { return "<b>"+d+"</b>"; } },
+                    { "data": "gender" },
+                    { "data": "ethnicity" },
+                    { "data": "status", "render": function(d) { return '<span class="label">'+d+'</span>'; } },
+                    { "data": "salaryInSql", "render": function(d) { return "<b>$" + parseFloat(d).toLocaleString() + "</b>"; } },
+                    { "data": "vacationDays", "render": function(d) { return d + " d"; } },
+                    { "data": null, "defaultContent": '<span class="label label-sync"><i class="icon-ok"></i> Verified</span>' }
+                ],
+                "language": { "processing": "<i class='icon-spinner icon-spin'></i> Syncing Master Data..." }
+            });
+
+            // 2. Khởi tạo Biểu đồ
+            renderStrategicChart();
+            $('#chartSelector').change(renderStrategicChart);
+        });
+
+        // HÀM LỌC DỮ LIỆU TỪ ALERTS
+        function filterTable(type) {
+            window.currentFilter = type;
+            masterTable.ajax.reload();
+            // Cuộn xuống bảng để CEO dễ nhìn
+            $('html, body').animate({ scrollTop: $("#masterTable").offset().top - 100 }, 500);
+        }
+
+        // HÀM CHẠY ĐỐI SOÁT TOÀN DIỆN
+        function triggerMasterSync(btn) {
+            var $btn = $(btn);
+            if (!confirm("Start full reconciliation between HR & Payroll?")) return;
+
+            $btn.addClass('disabled').html('<i class="icon-spinner icon-spin"></i> RECONCILING...');
+
+            $.post('@Url.Action("SeedData", "Admin")', function (res) {
+                if (res.success) {
+                    alert("✅ Integration Successful: All records matched and updated.");
+                    location.reload(); // Reload để cập nhật KPI Cards
+                } else {
+                    alert("❌ Error: " + res.message);
+                    $btn.removeClass('disabled').html('<i class="icon-refresh"></i> RUN FULL RECONCILIATION');
                 }
             });
         }
 
-        (function($) {
-            $(function() {
-                // Khởi tạo bảng với Server-side Paging 20 dòng
-                initDataTable();
-                // Khởi tạo biểu đồ an toàn
-                handleChartsDefensive();
+        // VẼ BIỂU ĐỒ CEO
+        function renderStrategicChart() {
+            var type = $('#chartSelector').val();
+            $.ajax({
+                url: 'http://127.0.0.1:3000/api/mysql/chart-data', // Vẫn lấy từ Node để giảm tải cho C#
+                type: 'GET',
+                data: { type: type },
+                success: function (response) {
+                    var $cont = $("#placeholder");
+                    if ($cont.width() > 0) {
+                        $.plot($cont, response, {
+                            series: { pie: { show: true, innerRadius: 0.4, label: { show: true, radius: 0.75,
+                                formatter: function(l, s) { return '<div style="font-size:10px;color:white;text-align:center;padding:2px;">'+l+'<br/>'+Math.round(s.percent)+'%</div>'; },
+                                background: { opacity: 0.5, color: '#000' }
+                            }}},
+                            legend: { show: true }
+                        });
+                    }
+                }
             });
-
-            function initDataTable() {
-                var $table = $('#masterTable');
-                if (!$table.length) return;
-
-                $table.DataTable({
-                    "processing": true,
-                    "serverSide": true,
-                    "pageLength": 20,
-                    "pagingType": "full_numbers",
-                    "ajax": {
-                        "url": "@Url.Action("GetEmployeesData", "Admin")",
-                        "type": "POST",
-                        "data": function (d) {
-                            // Gửi thêm filterType nếu CEO bấm vào các nút Alert
-                            d.filterType = "@ViewBag.ReportType";
-                            return d;
-                        }
-                    },
-                    "columns": [
-                        { "data": "id" },
-                        { 
-                            "data": "fullName",
-                            "render": function(data) { return "<b>" + (data || "N/A") + "</b>"; }
-                        },
-                        { "data": "ethnicity" },
-                        { 
-                            "data": "status",
-                            "render": function(d) {
-                                var cls = (d === "Full-time") ? "label-info" : "label-warning";
-                                return '<span class="label ' + cls + '">' + (d || "Active") + '</span>';
-                            }
-                        },
-                        {
-                            "data": "salaryInSql",
-                            "render": function(d) {
-                                return "<b>$" + (parseFloat(d) || 0).toLocaleString() + "</b>";
-                            }
-                        },
-                        { "data": "vacationDays" },
-                        {
-                            "data": null,
-                            "render": function () {
-                                return '<span class="label label-success">Integrated</span>';
-                            }
-                        }
-                    ],
-                    "language": {
-                        "processing": "Đang nạp 20 bản ghi...",
-                        "zeroRecords": "Không tìm thấy dữ liệu nhân sự"
-                    }
-                });
-            }
-
-            function handleChartsDefensive() {
-                const container = document.getElementById('placeholder');
-                if (!container) return;
-
-                const checkAndResize = () => {
-                    if (container.offsetWidth > 0 && container.offsetHeight > 0) {
-                        try {
-                            $(window).trigger('resize');
-                            if (typeof renderChart === "function") renderChart();
-                        } catch (e) { console.warn("Chart delay..."); }
-                    } else {
-                        requestAnimationFrame(checkAndResize);
-                    }
-                };
-                requestAnimationFrame(checkAndResize);
-            }
-        })(jQuery);
+        }
     </script>
 }

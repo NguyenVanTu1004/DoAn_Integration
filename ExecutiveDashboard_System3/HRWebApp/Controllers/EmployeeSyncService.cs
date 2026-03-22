@@ -6,7 +6,7 @@ using System.Text;
 using System.Web.Script.Serialization;
 using System.Net;
 using System.Configuration;
-using System.Linq; // Cực kỳ quan trọng để dùng ToDictionary
+using System.Linq;
 
 namespace System3_Integration
 {
@@ -16,9 +16,6 @@ namespace System3_Integration
         private readonly string _payrollApiUrl = "http://localhost:3000/api/mysql/employees";
         private readonly string _connectionString = ConfigurationManager.ConnectionStrings["HRDB"]?.ConnectionString;
 
-        // ==========================================================
-        // FIX LỖI CS1061: Tạo hàm này để khớp với AdminController
-        // ==========================================================
         public void SyncAllEmployees()
         {
             SyncAndReconcile();
@@ -35,16 +32,24 @@ namespace System3_Integration
                 try
                 {
                     // --- BƯỚC 1: LẤY DỮ LIỆU TỪ HR (SQL SERVER) ---
-                    Console.WriteLine("Đang kéo mảng JSON từ HR System...");
-                    string hrJson = client.DownloadString(_hrApiUrl);
-                    var hrList = serializer.Deserialize<List<HrEmployeeDto>>(hrJson);
+                    // Ép API nhả hết 500k dòng bằng tham số length
+                    Console.WriteLine("Đang kéo dữ liệu từ HR System...");
+                    string hrJson = client.DownloadString(_hrApiUrl + "?start=0&length=500000");
+
+                    // SỬA: Phải bóc lớp vỏ .data của API C# mới
+                    var hrWrapper = serializer.Deserialize<Dictionary<string, object>>(hrJson);
+                    var hrList = serializer.ConvertToType<List<HrEmployeeDto>>(hrWrapper["data"]);
 
                     // --- BƯỚC 2: LẤY DỮ LIỆU TỪ PAYROLL (NODEJS/MYSQL) ---
-                    Console.WriteLine("Đang kéo mảng JSON từ Payroll System...");
-                    string payrollJson = client.DownloadString(_payrollApiUrl);
-                    var payrollList = serializer.Deserialize<List<PayrollEmployeeDto>>(payrollJson);
+                    Console.WriteLine("Đang kéo dữ liệu từ Payroll System...");
+                    string payrollJson = client.DownloadString(_payrollApiUrl + "?limit=500000");
+
+                    // SỬA: Phải bóc lớp vỏ .data của API Node.js mới
+                    var payrollWrapper = serializer.Deserialize<Dictionary<string, object>>(payrollJson);
+                    var payrollList = serializer.ConvertToType<List<PayrollEmployeeDto>>(payrollWrapper["data"]);
 
                     // --- BƯỚC 3: ĐỐI SOÁT (MAPPING) ---
+                    // Dùng Dictionary để mapping O(1) - cực nhanh cho 500k dòng
                     var payrollDict = payrollList.ToDictionary(p => p.id, p => p);
                     List<FinalIntegratedEmployee> finalData = new List<FinalIntegratedEmployee>();
 
@@ -57,7 +62,7 @@ namespace System3_Integration
                             Ethnicity = hr.ethnicity ?? "N/A",
                             Vacation_Days = hr.vacationDays,
                             Employment_Status = hr.status ?? "Active",
-                            Gender = hr.gender // Giữ nguyên gender từ HR
+                            Gender = hr.gender
                         };
 
                         if (payrollDict.ContainsKey(hr.id))
@@ -103,8 +108,8 @@ namespace System3_Integration
                 using (SqlBulkCopy bulkCopy = new SqlBulkCopy(conn))
                 {
                     bulkCopy.DestinationTableName = "SyncEmployees";
+                    bulkCopy.BatchSize = 5000; // Tối ưu việc đẩy dữ liệu theo lô
 
-                    // Map chính xác theo các cột trong bảng SQL của Tứ (hình ảnh SSMS)
                     bulkCopy.ColumnMappings.Add("Employee_ID", "Employee_ID");
                     bulkCopy.ColumnMappings.Add("First_Name", "First_Name");
                     bulkCopy.ColumnMappings.Add("Last_Name", "Last_Name");
@@ -133,36 +138,27 @@ namespace System3_Integration
 
             foreach (var item in items)
             {
-                // Tách Tên để khớp với 2 cột First_Name và Last_Name trong DB
                 string firstName = "Unknown";
                 string lastName = "";
                 if (!string.IsNullOrEmpty(item.FullName))
                 {
-                    string[] parts = item.FullName.Split(' ');
+                    string[] parts = item.FullName.Split(new[] { ' ' }, 2, StringSplitOptions.RemoveEmptyEntries);
                     firstName = parts[0];
-                    if (parts.Length > 1) lastName = string.Join(" ", parts.Skip(1));
+                    if (parts.Length > 1) lastName = parts[1];
                 }
 
-                dt.Rows.Add(
-                    item.Employee_ID,
-                    firstName,
-                    lastName,
-                    item.Gender,
-                    item.Ethnicity,
-                    item.Salary,
-                    item.Vacation_Days,
-                    item.Employment_Status
-                );
+                dt.Rows.Add(item.Employee_ID, firstName, lastName, item.Gender, item.Ethnicity, item.Salary, item.Vacation_Days, item.Employment_Status);
             }
             return dt;
         }
     }
 
+    // Các DTO giữ nguyên như thiết kế của bạn
     public class HrEmployeeDto
     {
         public int id { get; set; }
         public string fullName { get; set; }
-        public bool gender { get; set; } // Thêm gender để đồng bộ
+        public bool gender { get; set; }
         public string ethnicity { get; set; }
         public decimal salaryInSql { get; set; }
         public int vacationDays { get; set; }

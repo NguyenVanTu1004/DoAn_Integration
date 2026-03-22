@@ -6,22 +6,22 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// --- CẤU HÌNH KẾT NỐI ---
+// --- CẤU HÌNH KẾT NỐI (Giữ nguyên Port 3307 đã thông) ---
 const pool = mysql.createPool({
-    host: 'localhost',
+    host: '127.0.0.1',
     user: 'root',
     password: '123456',
     database: 'payroll',
     port: 3307,
     waitForConnections: true,
-    connectionLimit: 15, // Tăng giới hạn kết nối khi lấy dữ liệu lớn
+    connectionLimit: 15,
     queueLimit: 0
 });
 
 app.get('/api/mysql/employees', async (req, res) => {
     try {
-        // 1. Bỏ LIMIT 100 để lấy hết sạch dữ liệu
-        // 2. Ép ID (Employee_Number - 1000) để bắt đầu từ 1
+        // SQL lấy 100 dòng đầu tiên, bắt đầu tính ID từ 1 (giảm đi 1000)
+        // Sử dụng dấu huyền cho tên bảng để tránh lỗi cú pháp
         const sql = `
             SELECT 
                 (e.Employee_Number - 1000) AS id, 
@@ -34,11 +34,14 @@ app.get('/api/mysql/employees', async (req, res) => {
             LEFT JOIN \`pay_rates\` AS p ON e.PayRates_id = p.idPay_Rates
             WHERE e.Employee_Number >= 1001
             ORDER BY id ASC
+            LIMIT 100
         `;
 
         const [rows] = await pool.query(sql);
         
-        console.log(`[${new Date().toLocaleTimeString()}] ✅ Đã truy xuất TOÀN BỘ: ${rows.length} dòng dữ liệu.`);
+        console.log(`[${new Date().toLocaleTimeString()}] ✅ Đã lấy 100 dòng đầu tiên thành công.`);
+        
+        // Trả về dữ liệu phẳng (Array) để Dashboard dễ đọc
         res.status(200).json(rows);
         
     } catch (err) {
@@ -49,7 +52,6 @@ app.get('/api/mysql/employees', async (req, res) => {
 
 const PORT = 3000;
 app.listen(PORT, () => {
-    console.log(`
-     URL: http://127.0.0.1:3000/api/mysql/employees
-    `);
+    console.log(`--------------------------------------------------`);
+    console.log(`🚀 SERVER ĐÃ CHẠY: http://127.0.0.1:${PORT}/api/mysql/employees`);
 });

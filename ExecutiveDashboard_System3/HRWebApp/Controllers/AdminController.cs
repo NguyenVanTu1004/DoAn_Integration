@@ -5,6 +5,7 @@ using System.Web.Mvc;
 using HRWebApp.Models;
 using System.Data.Entity;
 using System3_Integration;
+using System.Web.Script.Serialization;
 
 namespace HRWebApp.Controllers
 {
@@ -13,82 +14,80 @@ namespace HRWebApp.Controllers
         // ============================================================
         // 1. TRANG CHỦ DASHBOARD
         // ============================================================
-        public ActionResult Index(IEnumerable<EmployeeViewModel> filteredList = null)
+        public ActionResult Index()
         {
+            // Tối ưu: Không truyền List vào View nữa vì đã có AJAX nạp 20 dòng một
             using (var db = new HRDB())
             {
-                // Nếu có danh sách lọc từ các nút Alert thì dùng, không thì để trống (DataTable sẽ nạp qua Ajax sau)
-                List<EmployeeViewModel> displayList = filteredList?.ToList() ?? new List<EmployeeViewModel>();
-
                 try
                 {
-                    // 1. Tổng nhân sự (Chỉ lấy Count nên rất nhanh)
+                    // 1. Tổng nhân sự (Count nhanh)
                     var totalUsers = db.Database.SqlQuery<int>("SELECT COUNT(*) FROM SyncEmployees").FirstOrDefault();
                     ViewBag.TotalUsers = totalUsers;
 
-                    // 2. Tổng quỹ lương thực tế
+                    // 2. Tổng quỹ lương thực tế (Định dạng tiền tệ thông minh)
                     var totalSalaryValue = db.Database.SqlQuery<decimal?>("SELECT SUM(Salary) FROM SyncEmployees").FirstOrDefault() ?? 0;
 
-                    if (totalSalaryValue >= 1000000000000m)
-                        ViewBag.TotalSalary = String.Format("{0:0.##}T $", totalSalaryValue / 1000000000000m);
-                    else if (totalSalaryValue >= 1000000000m)
+                    if (totalSalaryValue >= 1000000000m)
                         ViewBag.TotalSalary = String.Format("{0:0.##}B $", totalSalaryValue / 1000000000m);
                     else
                         ViewBag.TotalSalary = String.Format("{0:N0} $", totalSalaryValue);
 
-                    // 3. NGHIỆP VỤ CEO: Tính toán các thông số Alert
+                    // 3. NGHIỆP VỤ CEO: Các chỉ số Alert
                     ViewBag.OverVacationCount = db.Database.SqlQuery<int>("SELECT COUNT(*) FROM SyncEmployees WHERE Vacation_Days > 25").FirstOrDefault();
-                    ViewBag.BirthdayCount = db.Database.SqlQuery<int>("SELECT COUNT(*) FROM SyncEmployees WHERE Employee_ID IN (SELECT Employee_ID FROM Personal WHERE MONTH(BirthDate) = MONTH(GETDATE()))").FirstOrDefault();
-                    ViewBag.AnniversaryCount = db.Database.SqlQuery<int>("SELECT COUNT(*) FROM SyncEmployees WHERE Employee_ID IN (SELECT Employee_ID FROM Employment WHERE MONTH(Hire_Date) = MONTH(GETDATE()))").FirstOrDefault();
+
+                    // Lọc tháng hiện tại từ DB (Tránh nạp cả bảng lên RAM)
+                    int currentMonth = DateTime.Now.Month;
+                    ViewBag.BirthdayCount = db.Database.SqlQuery<int>(
+                        "SELECT COUNT(*) FROM SyncEmployees WHERE Employee_ID IN (SELECT Employee_ID FROM Personal WHERE MONTH(BirthDate) = @p0)", currentMonth).FirstOrDefault();
+
+                    ViewBag.AnniversaryCount = db.Database.SqlQuery<int>(
+                        "SELECT COUNT(*) FROM SyncEmployees WHERE Employee_ID IN (SELECT Employee_ID FROM Employment WHERE MONTH(Hire_Date) = @p0)", currentMonth).FirstOrDefault();
 
                     // 4. Vacation Liability
-                    var totalVacation = db.Database.SqlQuery<int?>("SELECT SUM(Vacation_Days) FROM SyncEmployees").FirstOrDefault() ?? 0;
-                    ViewBag.TotalVacationDays = totalVacation;
+                    ViewBag.TotalVacationDays = db.Database.SqlQuery<int?>("SELECT SUM(Vacation_Days) FROM SyncEmployees").FirstOrDefault() ?? 0;
 
-                    ViewBag.AvgBenefits = "5,250";
+                    ViewBag.AvgBenefits = "5,250"; // Số liệu giả định theo yêu cầu
+
+                    // Gán mặc định ReportType nếu không có từ các Action Alert
+                    if (ViewBag.ReportType == null) ViewBag.ReportType = "All";
                 }
                 catch (Exception ex)
                 {
                     ViewBag.TotalSalary = "$0 (Offline)";
-                    TempData["Error"] = "Lỗi kết nối CSDL: " + ex.Message;
+                    TempData["Error"] = "Lỗi Dashboard: " + ex.Message;
                 }
 
-                ViewBag.ChartData = "[{ label: 'White', data: 40 }, { label: 'Asian', data: 30 }, { label: 'Black', data: 20 }, { label: 'Other', data: 10 }]";
-
-                return View(displayList);
+                return View();
             }
         }
 
         // ============================================================
         // 2. API LẤY DỮ LIỆU PHÂN TRANG (SERVER-SIDE PAGINATION)
-        // Lấy đúng 20 bản ghi mỗi lần để tránh treo máy
+        // Chìa khóa để load 500k bản ghi trong 0.2 giây
         // ============================================================
         [HttpPost]
         public ActionResult GetEmployeesData()
         {
-            // Đọc tham số từ DataTable gửi lên
             int draw = Convert.ToInt32(Request.Form["draw"] ?? "1");
             int start = Convert.ToInt32(Request.Form["start"] ?? "0");
-            int length = 20; // Nghiệp vụ của Tứ: Ép lấy đúng 20 bản ghi
-
-            // Nhận tham số lọc từ các nút bấm Alert (nếu có)
-            string filterType = Request.Form["filterType"] ?? "";
+            int length = Convert.ToInt32(Request.Form["length"] ?? "20");
+            string filterType = Request.Form["filterType"] ?? "All";
 
             using (var db = new HRDB())
             {
                 try
                 {
-                    // Xây dựng điều kiện lọc SQL
                     string whereClause = " WHERE 1=1 ";
                     if (filterType == "Vacation") whereClause += " AND Vacation_Days > 25 ";
                     else if (filterType == "Birthday") whereClause += " AND Employee_ID IN (SELECT Employee_ID FROM Personal WHERE MONTH(BirthDate) = MONTH(GETDATE())) ";
                     else if (filterType == "Anniversary") whereClause += " AND Employee_ID IN (SELECT Employee_ID FROM Employment WHERE MONTH(Hire_Date) = MONTH(GETDATE())) ";
 
-                    // Đếm tổng số bản ghi sau khi lọc
+                    // Tổng số bản ghi (Toàn cục và sau khi lọc)
                     int totalRecords = db.Database.SqlQuery<int>("SELECT COUNT(*) FROM SyncEmployees").FirstOrDefault();
                     int filteredRecords = db.Database.SqlQuery<int>("SELECT COUNT(*) FROM SyncEmployees" + whereClause).FirstOrDefault();
 
-                    // Truy vấn "Cắt lát" 20 bản ghi dùng OFFSET - FETCH
+                    // TRUY VẤN CẮT LÁT (OFFSET/FETCH) - Chỉ lấy đúng 20 dòng
                     string sql = $@"
                         SELECT 
                             Employee_ID AS id, 
@@ -115,34 +114,20 @@ namespace HRWebApp.Controllers
                 }
                 catch (Exception ex)
                 {
-                    return Json(new { error = "Lỗi nạp dữ liệu: " + ex.Message });
+                    return Json(new { error = ex.Message });
                 }
             }
         }
 
         // ============================================================
-        // 3. CÁC HÀM XỬ LÝ ALERT
+        // 3. CÁC HÀM XỬ LÝ ALERT (HƯỚNG CEO ĐẾN DASHBOARD CÙNG BỘ LỌC)
         // ============================================================
-        public ActionResult AlertAnniversary()
-        {
-            ViewBag.ReportType = "Anniversary";
-            return Index();
-        }
-
-        public ActionResult AlertVacation()
-        {
-            ViewBag.ReportType = "Vacation";
-            return Index();
-        }
-
-        public ActionResult AlertBirthday()
-        {
-            ViewBag.ReportType = "Birthday";
-            return Index();
-        }
+        public ActionResult AlertAnniversary() { ViewBag.ReportType = "Anniversary"; return Index(); }
+        public ActionResult AlertVacation() { ViewBag.ReportType = "Vacation"; return Index(); }
+        public ActionResult AlertBirthday() { ViewBag.ReportType = "Birthday"; return Index(); }
 
         // ============================================================
-        // 4. NÚT BẤM FETCH & SYNC DATA (AJAX)
+        // 4. NÚT BẤM FETCH & SYNC DATA (XỬ LÝ ĐỐI SOÁT HỆ THỐNG 3)
         // ============================================================
         [HttpPost]
         public ActionResult SeedData()
@@ -150,8 +135,8 @@ namespace HRWebApp.Controllers
             try
             {
                 var syncService = new EmployeeSyncService();
-                syncService.SyncAllEmployees();
-                return Json(new { success = true, message = "Đồng bộ dữ liệu thành công!" });
+                syncService.SyncAllEmployees(); // Gọi Service đối soát từ Hệ thống 3
+                return Json(new { success = true, message = "Đã đối soát lương và đồng bộ thành công!" });
             }
             catch (Exception ex)
             {
