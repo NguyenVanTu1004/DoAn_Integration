@@ -284,7 +284,7 @@
 
 <script type="text/javascript">
     $(document).ready(function () {
-        // 2. LẤY DỮ LIỆU TỪ CONTROLLER
+        // 1. LẤY DỮ LIỆU TỪ CONTROLLER
         var rawData = @Html.Raw(ViewBag.ChartData ?? "[]");
         var reportType = '@ViewBag.ReportType';
 
@@ -300,7 +300,7 @@
                         pie: {
                             show: true,
                             radius: 1,
-                            innerRadius: 0.4, // Tạo hình bánh Donut cho hiện đại
+                            innerRadius: 0.4,
                             label: {
                                 show: true,
                                 radius: 2/3,
@@ -314,15 +314,14 @@
                     legend: { show: true, location: "ne" }
                 };
             }
-            // B. CẤU HÌNH BIỂU ĐỒ CỘT CHI TIẾT (Cho Sinh nhật, Nghỉ phép, Kỷ niệm)
+            // B. CẤU HÌNH BIỂU ĐỒ CỘT CHI TIẾT (Sinh nhật, Nghỉ phép, Kỷ niệm)
             else {
                 var barData = [];
                 var ticks = [];
-                var barColor = "#458fba"; // Mặc định xanh dương
+                var barColor = "#458fba";
 
-                // Đổi màu theo loại cảnh báo của CEO
-                if (reportType === "Vacation") barColor = "#d9534f"; // Đỏ cảnh báo
-                if (reportType === "Birthday") barColor = "#5cb85c";  // Xanh lá tươi mới
+                if (reportType === "Vacation") barColor = "#d9534f";
+                if (reportType === "Birthday") barColor = "#5cb85c";
 
                 $.each(rawData, function (i, item) {
                     barData.push([i, item.data]);
@@ -342,59 +341,89 @@
                             barWidth: 0.6,
                             align: "center",
                             fill: 0.8,
-                            lineWidth: 1,
-                            order: 1
+                            lineWidth: 1
                         }
                     },
                     xaxis: {
                         ticks: ticks,
-                        tickLength: 0,
-                        axisLabel: "Danh mục",
-                        axisLabelUseCanvas: true,
-                        axisLabelFontSizePixels: 12,
-                        axisLabelPadding: 10
+                        tickLength: 0
                     },
                     yaxis: {
                         tickColor: "#f3f3f3",
-                        min: 0,
-                        axisLabel: "Số lượng nhân viên"
+                        min: 0
                     },
                     grid: {
                         hoverable: true,
-                        clickable: true,
                         borderWidth: 1,
-                        borderColor: '#f0f0f0',
-                        backgroundColor: { colors: ["#ffffff", "#f9f9f9"] }
+                        borderColor: '#f0f0f0'
                     },
                     legend: { show: false }
                 };
             }
 
-            // 3. THỰC THI VẼ BIỂU ĐỒ
+            // 2. THỰC THI VẼ BIỂU ĐỒ
             $.plot($("#placeholder2"), plotData, chartOptions);
-            // khai bao bang hien thi tat ca thong tin cua nhan vien 
 
+            // 3. KHAI BÁO BẢNG HIỂN THỊ (SERVER-SIDE PAGINATION)
+            // Đã fix lỗi chỉ hiện 100 dòng bằng cách nạp Server-side theo yêu cầu của Tứ
             $('#myTable').DataTable({
-    "processing": true,
-    "serverSide": true, // BẮT BUỘC để gọi vào đoạn code Skip/Take ở trên
-    "ajax": {
-        "url": "/Personals/Index",
-        "data": { "reportType": "@ViewBag.ReportType" }
-    },
-    "columns": [
-        { "data": "ID" },
-        { "data": "FullName" },
-        { "data": "Gender" },
-        { "data": "Shareholder" },
-        { "data": "EthnicityOrVacation" },
-        { "data": "Salary" },
-        { "data": "HireOrBirthDate" }
-    ],
-    "lengthMenu": [10, 20, 50, 100] // Đây chính là các lựa chọn giới hạn hiển thị
+                "processing": true,
+                "serverSide": true,
+                "ajax": {
+                    "url": "http://localhost:19335/api/employees/getall", // Gọi trực tiếp API Hệ thống 2
+                    "type": "GET",
+                    "data": function (d) {
+                        // Tính toán số trang gửi lên API
+                        d.page = (d.start / d.length) + 1;
+                        d.pageSize = d.length;
+                        d.reportType = reportType;
+                    },
+                    "dataSrc": "data"
+                },
+                "columns": [
+                    { "data": "Employee_ID" },
+                    {
+                        "data": null,
+                        "render": function(data) {
+                            return (data.First_Name || "") + " " + (data.Last_Name || "");
+                        }
+                    },
+                    {
+                        "data": "Gender",
+                        "render": function(d) { return d ? "Nam" : "Nữ"; }
+                    },
+                    { "data": "Ethnicity" },
+                    {
+                        "data": "Salary",
+                        "render": function(d) {
+                            var val = d ? parseFloat(d) : 0;
+                            return "<b>" + val.toLocaleString('en-US') + " $</b>";
+                        }
+                    },
+                    { "data": "Vacation_Days" },
+                    {
+                        "data": "Employment_Status",
+                        "render": function(d) {
+                            var status = d || "Active";
+                            var labelClass = (status === "Active") ? "label-success" : "label-important";
+                            return '<span class="label ' + labelClass + '">' + status + '</span>';
+                        }
+                    }
+                ],
+                "pageLength": 10,
+                "lengthMenu": [10, 20, 50, 100],
+                "language": {
+                    "processing": "Đang tải dữ liệu từ Server...",
+                    "info": "Hiển thị từ _START_ đến _END_ trong tổng số _TOTAL_ nhân viên",
+                    "infoEmpty": "Không có dữ liệu",
+                    "paginate": {
+                        "next": "Tiếp",
+                        "previous": "Trước"
+                    }
+                }
             });
 
-
-            // 4. HIỆU ỨNG TOOLTIP CHI TIẾT KHI RÊ CHUỘT
+            // 4. HIỆU ỨNG TOOLTIP KHI RÊ CHUỘT
             $("<div id='flot-tooltip'></div>").css({
                 position: "absolute",
                 display: "none",
@@ -413,7 +442,7 @@
                     var y = item.datapoint[1];
                     var label = (reportType !== "Birthday" && reportType !== "Vacation" && reportType !== "Anniversary")
                                 ? item.series.label
-                                : ticks[item.dataIndex][1];
+                                : (ticks[item.dataIndex] ? ticks[item.dataIndex][1] : "");
 
                     $("#flot-tooltip").html(label + ": " + y + " nhân viên")
                         .css({ top: item.pageY + 5, left: item.pageX + 5 })

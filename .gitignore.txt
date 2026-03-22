@@ -1,0 +1,17 @@
+# -- Visual Studio / C# --
+.vs/
+[Bb]in/
+[Oo]bj/
+packages/
+*.user
+*.suo
+
+# -- Node.js --
+node_modules/
+npm-debug.log
+
+# -- Database & OS --
+*.mdf
+*.ldf
+.DS_Store
+Thumbs.db

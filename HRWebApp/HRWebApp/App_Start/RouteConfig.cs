@@ -13,6 +13,15 @@ namespace HRWebApp
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
+            // ĐỊNH NGHĨA ROUTE RIÊNG CHO EMPLOYEE API
+            // URL này sẽ giúp link /api/employees/getall hoạt động dù tên file là EmployeeApiController
+            routes.MapRoute(
+                name: "EmployeeApiRoute",
+                url: "api/employees/{action}/{id}",
+                defaults: new { controller = "EmployeeApi", action = "getall", id = UrlParameter.Optional }
+            );
+
+            // ROUTE MẶC ĐỊNH
             routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",

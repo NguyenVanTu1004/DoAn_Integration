@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.36530.23
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HRWebApp", "HRWebApp\HRWebApp.csproj", "{178BE937-CF63-4A77-B0C9-FF1A5A511C7B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExecutiveDashboard_System3", "..\ExecutiveDashboard_System3\HRWebApp\ExecutiveDashboard_System3.csproj", "{97AB1D13-C4F5-4ECE-87BA-4A6ABDF1A538}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,8 +17,15 @@ Global
 		{178BE937-CF63-4A77-B0C9-FF1A5A511C7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{178BE937-CF63-4A77-B0C9-FF1A5A511C7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{178BE937-CF63-4A77-B0C9-FF1A5A511C7B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{97AB1D13-C4F5-4ECE-87BA-4A6ABDF1A538}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97AB1D13-C4F5-4ECE-87BA-4A6ABDF1A538}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97AB1D13-C4F5-4ECE-87BA-4A6ABDF1A538}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97AB1D13-C4F5-4ECE-87BA-4A6ABDF1A538}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C68DBC82-633C-4E65-861C-E727BF5CD457}
 	EndGlobalSection
 EndGlobal

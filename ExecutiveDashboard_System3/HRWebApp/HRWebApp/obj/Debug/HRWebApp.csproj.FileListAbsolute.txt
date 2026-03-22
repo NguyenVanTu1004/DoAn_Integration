@@ -42,3 +42,28 @@ E:\Anhdao\DTQT\Giao trinh\Software Intergration Practices\Material\5.Case study\
 E:\Anhdao\DTQT\Giao trinh\Software Intergration Practices\Material\5.Case study\Apps\HRWebApp\HRWebApp\HRWebApp\obj\Debug\HRWebApp.csprojResolveAssemblyReference.cache
 E:\Anhdao\DTQT\Giao trinh\Software Intergration Practices\Material\5.Case study\Apps\HRWebApp\HRWebApp\HRWebApp\obj\Debug\HRWebApp.dll
 E:\Anhdao\DTQT\Giao trinh\Software Intergration Practices\Material\5.Case study\Apps\HRWebApp\HRWebApp\HRWebApp\obj\Debug\HRWebApp.pdb
+C:\DoAnIntegration\ExecutiveDashboard_System3\HRWebApp\HRWebApp\bin\HRWebApp.dll.config
+C:\DoAnIntegration\ExecutiveDashboard_System3\HRWebApp\HRWebApp\bin\HRWebApp.dll
+C:\DoAnIntegration\ExecutiveDashboard_System3\HRWebApp\HRWebApp\bin\HRWebApp.pdb
+C:\DoAnIntegration\ExecutiveDashboard_System3\HRWebApp\HRWebApp\bin\EntityFramework.dll
+C:\DoAnIntegration\ExecutiveDashboard_System3\HRWebApp\HRWebApp\bin\EntityFramework.SqlServer.dll
+C:\DoAnIntegration\ExecutiveDashboard_System3\HRWebApp\HRWebApp\bin\Microsoft.Web.Infrastructure.dll
+C:\DoAnIntegration\ExecutiveDashboard_System3\HRWebApp\HRWebApp\bin\System.Web.Helpers.dll
+C:\DoAnIntegration\ExecutiveDashboard_System3\HRWebApp\HRWebApp\bin\System.Web.Mvc.dll
+C:\DoAnIntegration\ExecutiveDashboard_System3\HRWebApp\HRWebApp\bin\System.Web.Razor.dll
+C:\DoAnIntegration\ExecutiveDashboard_System3\HRWebApp\HRWebApp\bin\System.Web.Webpages.Deployment.dll
+C:\DoAnIntegration\ExecutiveDashboard_System3\HRWebApp\HRWebApp\bin\System.Web.Webpages.dll
+C:\DoAnIntegration\ExecutiveDashboard_System3\HRWebApp\HRWebApp\bin\System.Web.Webpages.Razor.dll
+C:\DoAnIntegration\ExecutiveDashboard_System3\HRWebApp\HRWebApp\bin\EntityFramework.xml
+C:\DoAnIntegration\ExecutiveDashboard_System3\HRWebApp\HRWebApp\bin\EntityFramework.SqlServer.xml
+C:\DoAnIntegration\ExecutiveDashboard_System3\HRWebApp\HRWebApp\bin\System.Web.Razor.xml
+C:\DoAnIntegration\ExecutiveDashboard_System3\HRWebApp\HRWebApp\bin\System.Web.Webpages.xml
+C:\DoAnIntegration\ExecutiveDashboard_System3\HRWebApp\HRWebApp\bin\System.Web.Webpages.Deployment.xml
+C:\DoAnIntegration\ExecutiveDashboard_System3\HRWebApp\HRWebApp\bin\System.Web.Webpages.Razor.xml
+C:\DoAnIntegration\ExecutiveDashboard_System3\HRWebApp\HRWebApp\bin\System.Web.Helpers.xml
+C:\DoAnIntegration\ExecutiveDashboard_System3\HRWebApp\HRWebApp\bin\System.Web.Mvc.xml
+C:\DoAnIntegration\ExecutiveDashboard_System3\HRWebApp\HRWebApp\obj\Debug\HRWebApp.csprojAssemblyReference.cache
+C:\DoAnIntegration\ExecutiveDashboard_System3\HRWebApp\HRWebApp\obj\Debug\HRWebApp.csproj.CoreCompileInputs.cache
+C:\DoAnIntegration\ExecutiveDashboard_System3\HRWebApp\HRWebApp\obj\Debug\HRWebApp.csproj.CopyComplete
+C:\DoAnIntegration\ExecutiveDashboard_System3\HRWebApp\HRWebApp\obj\Debug\HRWebApp.dll
+C:\DoAnIntegration\ExecutiveDashboard_System3\HRWebApp\HRWebApp\obj\Debug\HRWebApp.pdb

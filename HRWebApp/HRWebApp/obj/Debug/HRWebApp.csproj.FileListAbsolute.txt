@@ -75,7 +75,11 @@ C:\DoAnIntegration\HRWebApp\HRWebApp\bin\Bogus.dll
 C:\DoAnIntegration\HRWebApp\HRWebApp\bin\EntityFramework.dll
 C:\DoAnIntegration\HRWebApp\HRWebApp\bin\EntityFramework.SqlServer.dll
 C:\DoAnIntegration\HRWebApp\HRWebApp\bin\Microsoft.Web.Infrastructure.dll
+C:\DoAnIntegration\HRWebApp\HRWebApp\bin\Newtonsoft.Json.dll
+C:\DoAnIntegration\HRWebApp\HRWebApp\bin\System.Net.Http.Formatting.dll
 C:\DoAnIntegration\HRWebApp\HRWebApp\bin\System.Web.Helpers.dll
+C:\DoAnIntegration\HRWebApp\HRWebApp\bin\System.Web.Http.dll
+C:\DoAnIntegration\HRWebApp\HRWebApp\bin\System.Web.Http.WebHost.dll
 C:\DoAnIntegration\HRWebApp\HRWebApp\bin\System.Web.Mvc.dll
 C:\DoAnIntegration\HRWebApp\HRWebApp\bin\System.Web.Razor.dll
 C:\DoAnIntegration\HRWebApp\HRWebApp\bin\System.Web.Webpages.Deployment.dll
@@ -89,12 +93,8 @@ C:\DoAnIntegration\HRWebApp\HRWebApp\bin\System.Web.Webpages.Deployment.xml
 C:\DoAnIntegration\HRWebApp\HRWebApp\bin\System.Web.Webpages.Razor.xml
 C:\DoAnIntegration\HRWebApp\HRWebApp\bin\System.Web.Helpers.xml
 C:\DoAnIntegration\HRWebApp\HRWebApp\bin\System.Web.Mvc.xml
+C:\DoAnIntegration\HRWebApp\HRWebApp\obj\Debug\HRWebApp.csprojAssemblyReference.cache
 C:\DoAnIntegration\HRWebApp\HRWebApp\obj\Debug\HRWebApp.csproj.CoreCompileInputs.cache
 C:\DoAnIntegration\HRWebApp\HRWebApp\obj\Debug\HRWebApp.csproj.CopyComplete
 C:\DoAnIntegration\HRWebApp\HRWebApp\obj\Debug\HRWebApp.dll
 C:\DoAnIntegration\HRWebApp\HRWebApp\obj\Debug\HRWebApp.pdb
-C:\DoAnIntegration\HRWebApp\HRWebApp\obj\Debug\HRWebApp.csprojAssemblyReference.cache
-C:\DoAnIntegration\HRWebApp\HRWebApp\bin\Newtonsoft.Json.dll
-C:\DoAnIntegration\HRWebApp\HRWebApp\bin\System.Net.Http.Formatting.dll
-C:\DoAnIntegration\HRWebApp\HRWebApp\bin\System.Web.Http.dll
-C:\DoAnIntegration\HRWebApp\HRWebApp\bin\System.Web.Http.WebHost.dll
