@@ -4,7 +4,7 @@ Chào mừng team đã tham gia dự án! Đây là hệ thống đối soát nh
 🛠 1. Yêu cầu hệ thống (Prerequisites)
 Trước khi chạy, hãy đảm bảo máy bạn đã cài:
 
-Visual Studio 2019/2022 (Có cài gói ASP.NET and web development).
+Visual Studio 2017/2019/2022 (Có cài gói ASP.NET and web development).
 
 Node.js (Phiên bản 16.x trở lên).
 
