@@ -1,68 +1,84 @@
 📊 Strategic HR & Payroll System - Full Integration
-Hệ thống tích hợp đối soát nhân sự & lương đa nền tảng
+Hệ thống tích hợp đối soát nhân sự & lương đa nền tảng (Spring Boot, Node.js, .NET MVC)
 
-Chào mừng team đã tham gia dự án! Đây là hệ thống đối soát nhân sự và lương tích hợp Dashboard điều hành dành cho CEO. Hệ thống được xây dựng trên mô hình 3 lớp tích hợp:
+Hệ thống được xây dựng để giải quyết bài toán đối soát dữ liệu quy mô lớn (Big Data handling) giữa hệ thống Quản lý nhân sự (HR) và hệ thống Tính lương (Payroll), cung cấp Dashboard điều hành thời gian thực cho CEO.
 
-📂 1. Cấu trúc các Hệ thống (System Architecture)
-Dựa trên sơ đồ thư mục, hệ thống được chia làm 3 thành phần chính:
+📂 1. Kiến trúc Hệ thống (System Architecture)
+Dự án là một hệ sinh thái gồm 3 thành phần chính hoạt động phối hợp:
 
-Hệ thống 1: SpringApp (Payroll Core)
+Hệ thống 1: Payroll Core (Node.js & MySQL)
 
-Thư mục: SpringApp / API_MySQL_NodeJS
+Thư mục: API_MySQL_NodeJS
 
-Nhiệm vụ: Quản lý dữ liệu lương gốc trên MySQL. Chạy API Node.js để cung cấp dữ liệu đối soát.
+Vai trò: Quản lý dữ liệu lương gốc. Cung cấp RESTful API cho hệ thống đối soát.
 
-Hệ thống 2: HR System (Personal & Employment)
+Hệ thống 2: HR Management (ASP.NET MVC & SQL Server)
 
 Thư mục: HRWebApp
 
-Nhiệm vụ: Quản lý hồ sơ nhân sự, ngày vào làm và thông tin cá nhân trên SQL Server.
+Vai trò: Quản lý hồ sơ nhân sự, thông tin cá nhân và hợp đồng lao động.
 
-Hệ thống 3: Executive Dashboard (Integration Layer)
+Hệ thống 3: Executive Dashboard & Integration Layer (.NET Framework)
 
 Thư mục: ExecutiveDashboard_System3
 
-Nhiệm vụ: "Trái tim" của dự án. Thực hiện logic đối soát (Reconciliation), xử lý 500.000 dòng dữ liệu và hiển thị biểu đồ phân tích cho CEO.
+Vai trò: "Bộ não" của dự án. Thực hiện Data Reconciliation (Đối soát), xử lý 500.000 dòng dữ liệu bằng kỹ thuật tối ưu hiệu suất và hiển thị biểu đồ phân tích.
 
 🚀 2. Hướng dẫn Cài đặt & Cấu hình
-🟢 Bước 1: Cấu hình Hệ thống 1 (SpringApp - API Payroll)
+🟢 Bước 1: Cấu hình API Payroll (Node.js)
 Truy cập thư mục API_MySQL_NodeJS.
 
-Mở Terminal/Command Prompt tại đây và chạy: npm install.
+Chạy lệnh: npm install để cài đặt thư viện.
 
-Mở file server.js, cập nhật thông tin user và password MySQL của máy bạn.
+Cấu hình file server.js: Cập nhật user và password MySQL của máy bạn.
 
-Khởi động API: node server.js (Mặc định chạy tại cổng 3000).
+Khởi động: node server.js (Mặc định chạy tại cổng 3000).
 
-🔵 Bước 2: Cấu hình Hệ thống 2 & 3 (HR & Dashboard)
+🔵 Bước 2: Cấu hình HR & Dashboard (Visual Studio)
 Mở file Solution (.sln) bằng Visual Studio.
 
-Khôi phục thư viện: Vào Tools -> NuGet Package Manager -> Manage NuGet Packages for Solution. Đảm bảo các gói Bogus (tạo dữ liệu giả) và Entity Framework đã được cài đặt.
+NuGet Restore: Chuột phải vào Solution -> Restore NuGet Packages.
 
-Cấu hình kết nối: Mở file Web.config trong HRWebApp, sửa connectionString SQL Server cho khớp với máy bạn (Server=.; Database=HR;...).
+Web.config: Cập nhật connectionString trong cả 2 project HRWebApp và ExecutiveDashboard_System3 để kết nối đúng SQL Server cục bộ.
 
-Thiết lập cổng: Đảm bảo Project Url được đặt là http://localhost:44300/.
+🗄️ Bước 3: Thiết lập Cơ sở dữ liệu
+SQL Server: Tạo DB tên HR. Chạy script HR_Full_Data.sql. (Lưu ý: File nặng ~732MB, hãy đảm bảo ổ cứng còn trống).
 
-🗄️ 3. Triển khai Cơ sở dữ liệu (Database Setup)
-Team cần nạp dữ liệu từ các file script đính kèm trong thư mục gốc:
+MySQL: Chạy script tạo bảng trong thư mục API để khởi tạo dữ liệu lương.
 
-SQL Server (HR System): Mở SSMS, tạo Database tên HR. Mở file HR_Full_Data.sql (dung lượng ~732MB) và nhấn F5 (Execute). Quá trình này sẽ nạp 500.000 bản ghi nhân sự.
+🖥️ 3. Chi tiết Hệ thống thứ 3: Executive Dashboard (Trọng tâm)
+Đây là phần quan trọng nhất để trình bày với CEO. Hệ thống thực hiện các tác vụ kỹ thuật cao:
 
-MySQL (Payroll System): Chạy script tạo bảng lương tương ứng trong MySQL để API Node.js có dữ liệu đối soát.
+⚙️ Chức năng cốt lõi:
+Data Synchronization: Sử dụng thư viện SignalR để cập nhật tiến độ đối soát lên màn hình theo thời gian thực (Real-time Progress Bar).
 
-🕹️ 4. Quy trình Vận hành & Kiểm thử (Test Plan)
-Để hệ thống không bị lỗi kết nối giữa các nền tảng, hãy thực hiện theo đúng thứ tự:
+High-Performance Auditing: Áp dụng thuật toán so sánh song song để đối soát 500.000 bản ghi giữa SQL Server và API Node.js mà không gây treo trình duyệt.
 
-Khởi động các Service: Bật MySQL Server và SQL Server.
+CEO Analytics: Hiển thị tổng quỹ lương, biến động nhân sự và tỷ lệ sai lệch dữ liệu qua biểu đồ trực quan.
 
-Chạy API nguồn: Chạy lệnh - node server.js tại thư mục API.
+🛠 Quy trình vận hành đối soát:
+Trigger Audit: Nhấn nút "EXECUTE SYSTEM AUDIT".
 
-Khởi chạy Dashboard: Nhấn F5 trong Visual Studio để chạy ExecutiveDashboard_System3.
+Processing: Hệ thống sẽ gửi yêu cầu lấy dữ liệu từ API (Cổng 3000), sau đó so khớp với bảng Employment trong SQL Server dựa trên Employee_ID.
 
-Thực hiện Đối soát:
+Visualization: * Màu xanh (Verified): Dữ liệu khớp 100%.
 
-Tại màn hình Dashboard, nhấn nút "EXECUTE SYSTEM AUDIT".
+Màu đỏ (Discrepancy): Cảnh báo sai lệch lương hoặc thiếu hụt hồ sơ.
 
-Hệ thống sẽ gọi API từ SpringApp, so sánh với dữ liệu trong HR System.
+🕹️ 4. Kế hoạch Kiểm thử (Test Plan)
+Để đảm bảo hệ thống không bị lỗi kết nối, hãy tuân thủ thứ tự:
 
-Kết quả sẽ hiển thị nhãn "VERIFIED" màu xanh nếu lương khớp nhau 100%.
+Bật MySQL & SQL Server.
+
+Chạy API Node.js (node server.js).
+
+Nhấn F5 chạy Dashboard từ Visual Studio.
+
+Kiểm tra: Truy cập http://localhost:44300/ và thực hiện đồng bộ dữ liệu. Nếu thấy thông báo "Audit Completed" là thành công.
+
+⚠️ Lưu ý về bảo mật & hiệu suất
+Hệ thống sử dụng BCrypt để mã hóa mật khẩu trong bảng UserAccount.
+
+Sử dụng Pagination (Phân trang) khi hiển thị danh sách 500.000 nhân viên để tối ưu bộ nhớ RAM của trình duyệt.
+
+Dự án thực hiện bởi: Tứ, Thiện, Lâm (Software Engineering Student - DTU)
